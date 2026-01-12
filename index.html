@@ -19,7 +19,6 @@
       --cellHover:#16213a;
       --radius:14px;
 
-      /* attention color for instruction line */
       --attention:#fbbf24;
     }
     *{box-sizing:border-box}
@@ -91,6 +90,7 @@
       font-weight: 600;
       font-size: 13px;
       user-select:none;
+      white-space:nowrap;
     }
     .btn:hover{background: rgba(255,255,255,.10)}
     .btn.primary{
@@ -102,6 +102,52 @@
       border-color: rgba(96,165,250,.22);
     }
 
+    /* Admin settings panel */
+    .adminPanel{
+      background: rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius: 14px;
+      padding: 10px;
+      min-width: 260px;
+    }
+    .adminPanelHeader{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:8px;
+    }
+    .adminTitle{
+      font-size: 12px;
+      letter-spacing:.3px;
+      color: rgba(229,231,235,.9);
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+    .adminStatus{
+      font-size: 12px;
+      color: var(--muted);
+      display:flex;
+      align-items:center;
+      gap:6px;
+      user-select:none;
+    }
+    .dot{
+      width:8px;height:8px;border-radius:999px;
+      background: rgba(239,68,68,.95);
+      box-shadow: 0 0 0 3px rgba(239,68,68,.15);
+    }
+    .dot.ok{
+      background: rgba(34,197,94,.95);
+      box-shadow: 0 0 0 3px rgba(34,197,94,.18);
+    }
+    .adminButtons{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
     .gridCard{
       margin-top: 16px;
       background: rgba(18,24,38,.72);
@@ -111,7 +157,6 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.25);
     }
 
-    /* Board layout + team labels */
     .boardHeader{
       display:flex;
       justify-content:space-between;
@@ -144,8 +189,8 @@
 
     .boardArea{
       position: relative;
-      padding-top: 54px;      /* space for Team 1 centered label */
-      padding-left: 60px;     /* space for Team 2 vertical label */
+      padding-top: 54px;
+      padding-left: 60px;
     }
     .team1Top{
       position:absolute;
@@ -172,7 +217,6 @@
       transform-origin: center;
     }
 
-    /* Option A: make only the grid horizontally scrollable */
     .boardScroll{
       overflow-x:auto;
       -webkit-overflow-scrolling: touch;
@@ -184,15 +228,12 @@
       border-radius: 999px;
     }
 
-    /* Board */
     .board{
       display:grid;
       grid-template-columns: 48px repeat(10, minmax(0, 1fr));
       gap: 6px;
       border-top: 1px solid rgba(255,255,255,.06);
       padding-top: 10px;
-
-      /* keep it readable on mobile (scroll container handles overflow) */
       min-width: 760px;
     }
     .hcell, .lcell, .cell{
@@ -213,7 +254,6 @@
       color: #dbeafe;
       user-select:none;
     }
-    /* corner is present for alignment, but invisible (no visible "box") */
     .cornerHidden{
       background: transparent !important;
       border-color: transparent !important;
@@ -233,8 +273,6 @@
       background: rgba(22,33,58,.95);
       border-color: rgba(255,255,255,.16);
     }
-
-    /* Highlight claimed squares */
     .cell.taken{
       background: rgba(34,197,94,.18);
       border-color: rgba(34,197,94,.35);
@@ -243,7 +281,6 @@
       cursor:pointer;
     }
 
-    /* Players + Score/Payout */
     .sectionTitle{
       margin-top: 14px;
       font-size: 13px;
@@ -293,9 +330,10 @@
       .team1Top{left: 54px;}
       .team2Side{width: 54px;}
       .board{ min-width: 760px; }
+      .adminPanel{width:100%;}
+      .adminButtons{justify-content:flex-start;}
     }
 
-    /* Modal */
     .modalBack{
       position:fixed; inset:0;
       background: rgba(0,0,0,.55);
@@ -340,7 +378,6 @@
     .status .ok{color: var(--accent)}
     .status .bad{color: var(--danger)}
 
-    /* Editable cells */
     td[contenteditable="true"]{
       outline: none;
       border-radius: 8px;
@@ -349,10 +386,9 @@
       box-shadow: 0 0 0 2px rgba(96,165,250,.35);
       background: rgba(255,255,255,.04);
     }
-
-    /* When locked (non-admin), show subtle not-allowed cursor */
     td.locked{
       cursor:not-allowed;
+      opacity: .85;
     }
   </style>
 </head>
@@ -374,10 +410,25 @@
         </div>
 
         <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+          <!-- Public action -->
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
-            <button class="btn primary" id="randomizeBtn" title="Randomize header numbers (admin)">Randomize 0–9</button>
-            <button class="btn subtle" id="clearHeadersBtn" title="Clear header rows (admin)">Clear header rows</button>
             <button class="btn" id="exportBtn" title="Download an image of the page">Export Image</button>
+          </div>
+
+          <!-- Admin settings (separated) -->
+          <div class="adminPanel">
+            <div class="adminPanelHeader">
+              <div class="adminTitle">Admin Settings</div>
+              <div class="adminStatus">
+                <span class="dot" id="adminDot"></span>
+                <span id="adminLabel">Locked</span>
+              </div>
+            </div>
+            <div class="adminButtons">
+              <button class="btn primary" id="adminUnlockBtn" title="Unlock admin editing">Admin Unlock</button>
+              <button class="btn primary" id="randomizeBtn" title="Randomize header numbers (admin)">Randomize 0–9</button>
+              <button class="btn subtle" id="clearHeadersBtn" title="Clear header rows (admin)">Clear header rows</button>
+            </div>
           </div>
         </div>
       </div>
@@ -388,9 +439,7 @@
     </header>
 
     <div class="gridCard">
-      <div class="boardHeader">
-        <!-- Removed the “Headers are protected…” text per request -->
-      </div>
+      <div class="boardHeader"></div>
 
       <div class="boardArea">
         <div class="team1Top">
@@ -426,7 +475,6 @@
           </thead>
           <tbody id="playersBody"></tbody>
         </table>
-        <!-- Removed the players note per request -->
       </div>
 
       <div class="bottomRow">
@@ -481,7 +529,6 @@
               <tr><td>Q4</td><td contenteditable="true" data-pname="q4"></td><td contenteditable="true" data-ppay="q4"></td></tr>
             </tbody>
           </table>
-          <!-- Removed the payout note per request -->
         </div>
       </div>
     </div>
@@ -553,7 +600,6 @@
     const defaultState = () => ({
       team1: "TEAM 1",
       team2: "TEAM 2",
-      // headers start as blank (admin randomizes later)
       colNums: Array(10).fill(""),
       rowNums: Array(10).fill(""),
       squares: Array.from({length:10}, () =>
@@ -575,12 +621,11 @@
     let state = defaultState();
     let selected = {r:null, c:null};
 
-    // Firebase handles
     let app, db, auth;
     let userReady = false;
     let applyingRemote = false;
 
-    // Admin session unlock (for editing areas)
+    // Admin session unlock (button-controlled)
     let adminUnlocked = false;
 
     /**********************
@@ -611,6 +656,11 @@
     const accessStatus = document.getElementById("accessStatus");
     const accessBtn = document.getElementById("accessBtn");
     const firebaseStatus = document.getElementById("firebaseStatus");
+
+    // Admin UI
+    const adminUnlockBtn = document.getElementById("adminUnlockBtn");
+    const adminDot = document.getElementById("adminDot");
+    const adminLabel = document.getElementById("adminLabel");
 
     /**********************
      * ACCESS CODE (once on page load)
@@ -694,19 +744,6 @@
       const snap = await get(poolStateRef());
       if (!snap.exists()){
         await set(poolStateRef(), defaultState());
-      }else{
-        // Backward compatibility if older states had numeric headers:
-        const remote = snap.val();
-        if (Array.isArray(remote?.colNums) && remote.colNums.length === 10) {
-          // ok
-        } else if (Array.isArray(remote?.colNums) && remote.colNums.length === 0) {
-          remote.colNums = Array(10).fill("");
-        }
-        if (Array.isArray(remote?.rowNums) && remote.rowNums.length === 10) {
-          // ok
-        } else if (Array.isArray(remote?.rowNums) && remote.rowNums.length === 0) {
-          remote.rowNums = Array(10).fill("");
-        }
       }
     }
 
@@ -718,7 +755,6 @@
         if (!remote) return;
         applyingRemote = true;
         state = remote;
-        // Ensure headers arrays exist
         if (!Array.isArray(state.colNums) || state.colNums.length !== 10) state.colNums = Array(10).fill("");
         if (!Array.isArray(state.rowNums) || state.rowNums.length !== 10) state.rowNums = Array(10).fill("");
         render();
@@ -732,28 +768,44 @@
     }
 
     /**********************
-     * ADMIN PASSWORD
+     * ADMIN UNLOCK (button)
      **********************/
+    function updateAdminBadge(){
+      if (adminUnlocked){
+        adminDot.classList.add("ok");
+        adminLabel.textContent = "Unlocked";
+      }else{
+        adminDot.classList.remove("ok");
+        adminLabel.textContent = "Locked";
+      }
+    }
+
     function promptAdminPassword(){
       const entered = prompt("Enter admin password:");
       return (entered || "").trim() === ADMIN_PASSWORD;
     }
 
-    function ensureAdminUnlockedOnce(){
-      if (adminUnlocked) return true;
-      const ok = promptAdminPassword();
-      if (ok) adminUnlocked = true;
-      else alert("Incorrect admin password.");
-      return adminUnlocked;
-    }
+    adminUnlockBtn.addEventListener("click", () => {
+      if (adminUnlocked) return; // already unlocked
+      if (!promptAdminPassword()) {
+        alert("Incorrect admin password.");
+        return;
+      }
+      adminUnlocked = true;
+      updateAdminBadge();
+      applyAdminLocks(); // enable editing immediately
+      alert("Admin unlocked on this device (until refresh).");
+    });
 
     /**********************
-     * HEADER BUTTONS
+     * HEADER BUTTONS (admin-gated)
      **********************/
     document.getElementById("randomizeBtn").addEventListener("click", () => {
-      // Password required EVERY time
-      if (!promptAdminPassword()) return alert("Incorrect admin password.");
-
+      // Must be admin-unlocked first
+      if (!adminUnlocked) {
+        alert("Admin Unlock required.");
+        return;
+      }
       state.colNums = shuffle([...Array(10)].map((_,i)=>i));
       state.rowNums = shuffle([...Array(10)].map((_,i)=>i));
       persistToFirebase(state);
@@ -761,9 +813,10 @@
     });
 
     document.getElementById("clearHeadersBtn").addEventListener("click", () => {
-      // Password required EVERY time
-      if (!promptAdminPassword()) return alert("Incorrect admin password.");
-
+      if (!adminUnlocked) {
+        alert("Admin Unlock required.");
+        return;
+      }
       state.colNums = Array(10).fill("");
       state.rowNums = Array(10).fill("");
       persistToFirebase(state);
@@ -852,6 +905,54 @@
     }
 
     /**********************
+     * SCORE + PAYOUT BINDING
+     **********************/
+    const scoreCells = [
+      ["t1","q1","t1q1"],["t1","q2","t1q2"],["t1","q3","t1q3"],["t1","q4","t1q4"],
+      ["t2","q1","t2q1"],["t2","q2","t2q2"],["t2","q3","t2q3"],["t2","q4","t2q4"],
+    ];
+
+    function bindScoreTracker(){
+      for (const [team, q, id] of scoreCells){
+        const el = document.getElementById(id);
+
+        // keep input handlers always attached
+        el.addEventListener("input", () => {
+          if (!adminUnlocked) return;
+
+          const txt = (el.textContent || "").trim();
+          const digit = txt === "" ? "" : txt.replace(/[^0-9]/g, "").slice(-1);
+          if (digit !== txt) el.textContent = digit;
+
+          state.scores = state.scores || { t1:{q1:"",q2:"",q3:"",q4:""}, t2:{q1:"",q2:"",q3:"",q4:""} };
+          state.scores[team][q] = digit;
+
+          persistToFirebase(state);
+          renderWinners();
+        });
+      }
+    }
+
+    function bindPayout(){
+      for (const q of ["q1","q2","q3","q4"]){
+        const nameCell = document.querySelector(`[data-pname="${q}"]`);
+        const payCell  = document.querySelector(`[data-ppay="${q}"]`);
+        if (!nameCell || !payCell) continue;
+
+        const save = () => {
+          if (!adminUnlocked) return;
+          state.payout = state.payout || { q1:{name:"",payout:""}, q2:{name:"",payout:""}, q3:{name:"",payout:""}, q4:{name:"",payout:""} };
+          state.payout[q].name = (nameCell.textContent || "").trim();
+          state.payout[q].payout = (payCell.textContent || "").trim();
+          persistToFirebase(state);
+        };
+
+        nameCell.addEventListener("blur", save);
+        payCell.addEventListener("blur", save);
+      }
+    }
+
+    /**********************
      * RENDER
      **********************/
     function render(){
@@ -863,6 +964,7 @@
       renderWinners();
       renderPayoutFromState();
       applyAdminLocks();
+      updateAdminBadge();
     }
 
     function renderLabels(){
@@ -874,11 +976,8 @@
 
     function renderBoard(){
       boardEl.innerHTML = "";
-
-      // Invisible corner placeholder (keeps alignment, not visible)
       boardEl.appendChild(div("hcell cornerHidden", ""));
 
-      // X header (10)
       for (let c=0; c<10; c++){
         const v = state.colNums?.[c];
         boardEl.appendChild(div("hcell", (typeof v === "number" ? String(v) : String(v || ""))));
@@ -973,22 +1072,7 @@
         tdPaid.dataset.pkey = p ? p.key : "";
         tdPaid.textContent = p ? (state.amountPaid?.[p.key] ?? "") : "";
 
-        // Locked unless adminUnlocked (prompt once per session on first edit attempt)
-        tdPaid.classList.add("locked");
-        tdPaid.contentEditable = adminUnlocked ? "true" : "false";
-
-        tdPaid.addEventListener("focus", () => {
-          if (!tdPaid.dataset.pkey) return;
-          if (adminUnlocked) return;
-          // Prompt once for session unlock
-          if (ensureAdminUnlockedOnce()){
-            applyAdminLocks();
-            tdPaid.focus();
-          } else {
-            tdPaid.blur();
-          }
-        });
-
+        // IMPORTANT: do not prompt on focus anymore
         tdPaid.addEventListener("blur", () => {
           if (!adminUnlocked) return;
           const key = tdPaid.dataset.pkey;
@@ -1010,44 +1094,8 @@
     }
 
     /**********************
-     * SCORE TRACKER
+     * SCORE + PAYOUT RENDER
      **********************/
-    const scoreCells = [
-      ["t1","q1","t1q1"],["t1","q2","t1q2"],["t1","q3","t1q3"],["t1","q4","t1q4"],
-      ["t2","q1","t2q1"],["t2","q2","t2q2"],["t2","q3","t2q3"],["t2","q4","t2q4"],
-    ];
-
-    function bindScoreTracker(){
-      for (const [team, q, id] of scoreCells){
-        const el = document.getElementById(id);
-
-        // gate editing
-        el.addEventListener("focus", () => {
-          if (adminUnlocked) return;
-          if (ensureAdminUnlockedOnce()){
-            applyAdminLocks();
-            el.focus();
-          } else {
-            el.blur();
-          }
-        });
-
-        el.addEventListener("input", () => {
-          if (!adminUnlocked) return;
-
-          const txt = (el.textContent || "").trim();
-          const digit = txt === "" ? "" : txt.replace(/[^0-9]/g, "").slice(-1);
-          if (digit !== txt) el.textContent = digit;
-
-          state.scores = state.scores || { t1:{q1:"",q2:"",q3:"",q4:""}, t2:{q1:"",q2:"",q3:"",q4:""} };
-          state.scores[team][q] = digit;
-
-          persistToFirebase(state);
-          renderWinners();
-        });
-      }
-    }
-
     function renderScoreTrackerFromState(){
       for (const [team, q, id] of scoreCells){
         const el = document.getElementById(id);
@@ -1056,9 +1104,6 @@
       }
     }
 
-    /**********************
-     * WINNER CALCULATION
-     **********************/
     function renderWinners(){
       const qs = ["q1","q2","q3","q4"];
       for (const q of qs){
@@ -1094,39 +1139,6 @@
       return -1;
     }
 
-    /**********************
-     * PAYOUT (editable - admin only)
-     **********************/
-    function bindPayout(){
-      for (const q of ["q1","q2","q3","q4"]){
-        const nameCell = document.querySelector(`[data-pname="${q}"]`);
-        const payCell  = document.querySelector(`[data-ppay="${q}"]`);
-        if (!nameCell || !payCell) continue;
-
-        const guard = (el) => {
-          el.addEventListener("focus", () => {
-            if (adminUnlocked) return;
-            if (ensureAdminUnlockedOnce()){
-              applyAdminLocks();
-              el.focus();
-            } else {
-              el.blur();
-            }
-          });
-          el.addEventListener("blur", () => {
-            if (!adminUnlocked) return;
-            state.payout = state.payout || { q1:{name:"",payout:""}, q2:{name:"",payout:""}, q3:{name:"",payout:""}, q4:{name:"",payout:""} };
-            state.payout[q].name = (nameCell.textContent || "").trim();
-            state.payout[q].payout = (payCell.textContent || "").trim();
-            persistToFirebase(state);
-          });
-        };
-
-        guard(nameCell);
-        guard(payCell);
-      }
-    }
-
     function renderPayoutFromState(){
       for (const q of ["q1","q2","q3","q4"]){
         const nameCell = document.querySelector(`[data-pname="${q}"]`);
@@ -1137,7 +1149,7 @@
     }
 
     /**********************
-     * Apply admin locks to editables
+     * Locks: only enabled after Admin Unlock button is used
      **********************/
     function applyAdminLocks(){
       // Score tracker cells
@@ -1145,20 +1157,28 @@
         const el = document.getElementById(id);
         if (!el) continue;
         el.contentEditable = adminUnlocked ? "true" : "false";
+        if (!adminUnlocked) el.classList.add("locked"); else el.classList.remove("locked");
       }
 
       // Payout cells
       for (const q of ["q1","q2","q3","q4"]){
         const nameCell = document.querySelector(`[data-pname="${q}"]`);
         const payCell  = document.querySelector(`[data-ppay="${q}"]`);
-        if (nameCell) nameCell.contentEditable = adminUnlocked ? "true" : "false";
-        if (payCell)  payCell.contentEditable  = adminUnlocked ? "true" : "false";
+        if (nameCell){
+          nameCell.contentEditable = adminUnlocked ? "true" : "false";
+          if (!adminUnlocked) nameCell.classList.add("locked"); else nameCell.classList.remove("locked");
+        }
+        if (payCell){
+          payCell.contentEditable = adminUnlocked ? "true" : "false";
+          if (!adminUnlocked) payCell.classList.add("locked"); else payCell.classList.remove("locked");
+        }
       }
 
-      // Amount Paid cells in Players table
+      // Amount Paid cells in Players table (only rows with a real player key)
       const paidCells = playersBody.querySelectorAll('td[data-pkey]');
       paidCells.forEach(td => {
-        td.contentEditable = (adminUnlocked && td.dataset.pkey) ? "true" : "false";
+        const canEdit = adminUnlocked && !!td.dataset.pkey;
+        td.contentEditable = canEdit ? "true" : "false";
         if (!adminUnlocked) td.classList.add("locked"); else td.classList.remove("locked");
       });
     }
@@ -1190,6 +1210,7 @@
      **********************/
     bindScoreTracker();
     bindPayout();
+    updateAdminBadge();
 
     if (!hasAccess()) {
       showAccess();
