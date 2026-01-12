@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Super Bowl Squares</title>
+  <title>Redzone Super Bowl Squares</title>
   <style>
     :root{
       --bg:#0b0f14;
@@ -18,6 +18,9 @@
       --cellTaken:#111827;
       --cellHover:#16213a;
       --radius:14px;
+
+      /* attention color for instruction line */
+      --attention:#fbbf24;
     }
     *{box-sizing:border-box}
     body{
@@ -55,6 +58,12 @@
       font-size: 13px;
       line-height:1.35;
     }
+    .sub.attention{
+      color: var(--attention);
+      font-weight: 900;
+      letter-spacing: .15px;
+      text-shadow: 0 1px 0 rgba(0,0,0,.35);
+    }
     .pillRow{
       display:flex; gap:10px; flex-wrap:wrap; align-items:center;
       margin-top:10px;
@@ -88,6 +97,10 @@
       background: rgba(34,197,94,.18);
       border-color: rgba(34,197,94,.35);
     }
+    .btn.subtle{
+      background: rgba(96,165,250,.10);
+      border-color: rgba(96,165,250,.22);
+    }
 
     .gridCard{
       margin-top: 16px;
@@ -104,7 +117,7 @@
       justify-content:space-between;
       gap:12px;
       flex-wrap:wrap;
-      align-items:center;
+      align-items:flex-start;
       margin-bottom: 10px;
     }
 
@@ -137,7 +150,7 @@
     .team1Top{
       position:absolute;
       top: 0;
-      left: 60px;             /* align over grid (after y-axis space) */
+      left: 60px;
       right: 0;
       display:flex;
       justify-content:center;
@@ -145,7 +158,7 @@
     }
     .team2Side{
       position:absolute;
-      top: 54px;              /* align with grid start (after top padding) */
+      top: 54px;
       left: 0;
       bottom: 0;
       width: 60px;
@@ -159,6 +172,18 @@
       transform-origin: center;
     }
 
+    /* Option A: make only the grid horizontally scrollable */
+    .boardScroll{
+      overflow-x:auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 6px;
+    }
+    .boardScroll::-webkit-scrollbar{ height: 8px; }
+    .boardScroll::-webkit-scrollbar-thumb{
+      background: rgba(255,255,255,.12);
+      border-radius: 999px;
+    }
+
     /* Board */
     .board{
       display:grid;
@@ -166,6 +191,9 @@
       gap: 6px;
       border-top: 1px solid rgba(255,255,255,.06);
       padding-top: 10px;
+
+      /* keep it readable on mobile (scroll container handles overflow) */
+      min-width: 760px;
     }
     .hcell, .lcell, .cell{
       border-radius: 10px;
@@ -185,14 +213,14 @@
       color: #dbeafe;
       user-select:none;
     }
-    .corner{
-      background: rgba(34,197,94,.10);
-      border-color: rgba(34,197,94,.22);
-      color:#dcfce7;
-      font-size: 12px;
-      font-weight: 800;
-      user-select:none;
+    /* corner is present for alignment, but invisible (no visible "box") */
+    .cornerHidden{
+      background: transparent !important;
+      border-color: transparent !important;
+      box-shadow: none !important;
+      color: transparent !important;
     }
+
     .cell{
       background: rgba(15,23,42,.85);
       cursor:pointer;
@@ -206,13 +234,13 @@
       border-color: rgba(255,255,255,.16);
     }
 
-    /* ✅ Highlight claimed squares (fits palette) */
+    /* Highlight claimed squares */
     .cell.taken{
-      background: rgba(34,197,94,.18);         /* soft green */
+      background: rgba(34,197,94,.18);
       border-color: rgba(34,197,94,.35);
       box-shadow: 0 0 0 1px rgba(34,197,94,.10) inset;
       opacity: 1;
-      cursor:pointer; /* allow editing/clearing */
+      cursor:pointer;
     }
 
     /* Players + Score/Payout */
@@ -243,6 +271,7 @@
       vertical-align: top;
     }
     th{color: var(--muted); font-weight:700}
+
     .note{
       color: var(--muted);
       font-size: 12px;
@@ -258,14 +287,12 @@
     }
 
     @media (max-width: 900px){
-      .board{
-        grid-template-columns: 42px repeat(10, minmax(0, 1fr));
-      }
       .bottomRow{grid-template-columns: 1fr;}
       .teamInput input{width: 140px;}
       .boardArea{padding-left: 54px;}
       .team1Top{left: 54px;}
       .team2Side{width: 54px;}
+      .board{ min-width: 760px; }
     }
 
     /* Modal */
@@ -322,43 +349,47 @@
       box-shadow: 0 0 0 2px rgba(96,165,250,.35);
       background: rgba(255,255,255,.04);
     }
+
+    /* When locked (non-admin), show subtle not-allowed cursor */
+    td.locked{
+      cursor:not-allowed;
+    }
   </style>
 </head>
 
 <body>
-  <div class="wrap">
+  <div class="wrap" id="pageRoot">
     <header>
       <div class="topRow">
         <div>
-          <h1>Super Bowl Squares</h1>
-          <div class="sub">
-            TYPE YOUR NAME IN THE SQUARE(S) YOU WANT TO SELECT. <b>$10 / square</b>.
-            <span style="color:#cbd5e1">First come, first served.</span>
+          <h1>Redzone Super Bowl Squares</h1>
+          <div class="sub attention">
+            TYPE YOUR NAME IN THE SQUARE(S) YOU WANT TO SELECT. <b>$10 / square</b>. First come, first served.
           </div>
           <div class="pillRow">
             <div class="pill">Blank Squares: <b id="blankCount">100</b></div>
             <div class="pill">Squares Selected: <b id="selectedCount">0</b></div>
             <div class="pill">Total Pot: <b id="totalPot">$0</b></div>
-            <div class="pill">Mode: <b id="modeLabel">Shared (Firebase)</b></div>
           </div>
         </div>
 
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <button class="btn primary" id="randomizeBtn" title="Randomize header numbers (admin)">Randomize 0–9</button>
-          <button class="btn" id="exportBtn" title="Download current board as JSON">Export</button>
+        <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+            <button class="btn primary" id="randomizeBtn" title="Randomize header numbers (admin)">Randomize 0–9</button>
+            <button class="btn subtle" id="clearHeadersBtn" title="Clear header rows (admin)">Clear header rows</button>
+            <button class="btn" id="exportBtn" title="Download an image of the page">Export Image</button>
+          </div>
         </div>
       </div>
 
       <div class="note">
-        Access code required on page load. Live shared board via Firebase.
+        Please send your payments to taynikita@gmailcom
       </div>
     </header>
 
     <div class="gridCard">
       <div class="boardHeader">
-        <div class="sub" style="max-width:720px">
-          Headers are “protected”. Click any square to enter your name (or clear it by deleting all text).
-        </div>
+        <!-- Removed the “Headers are protected…” text per request -->
       </div>
 
       <div class="boardArea">
@@ -376,7 +407,9 @@
           </div>
         </div>
 
-        <div class="board" id="board"></div>
+        <div class="boardScroll">
+          <div class="board" id="board"></div>
+        </div>
       </div>
 
       <div class="sectionTitle">PLAYERS</div>
@@ -393,7 +426,7 @@
           </thead>
           <tbody id="playersBody"></tbody>
         </table>
-        <div class="note">“Amount Paid” is editable. Everything else updates automatically from the squares.</div>
+        <!-- Removed the players note per request -->
       </div>
 
       <div class="bottomRow">
@@ -448,7 +481,7 @@
               <tr><td>Q4</td><td contenteditable="true" data-pname="q4"></td><td contenteditable="true" data-ppay="q4"></td></tr>
             </tbody>
           </table>
-          <div class="note">Name and Payout are editable.</div>
+          <!-- Removed the payout note per request -->
         </div>
       </div>
     </div>
@@ -488,7 +521,7 @@
      * FIREBASE IMPORTS (CDN)
      **********************/
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set, update, get, child } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+    import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
     import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
 
     /**********************
@@ -498,16 +531,18 @@
     const POOL_ACCESS_CODE = "TEST01";
     const ACCESS_VERSION = "v1";
 
+    const ADMIN_PASSWORD = "Edem";
+
     // 🔧 Replace with YOUR Firebase config (Project settings → Web app)
-  const firebaseConfig = {
-    apiKey: "AIzaSyAgO8eCKDswsIZ8dLDyaEmgIv8PberVO2w",
-    authDomain: "superbowl-squares-2026.firebaseapp.com",
-    databaseURL: "https://superbowl-squares-2026-default-rtdb.firebaseio.com",
-    projectId: "superbowl-squares-2026",
-    storageBucket: "superbowl-squares-2026.firebasestorage.app",
-    messagingSenderId: "901124318776",
-    appId: "1:901124318776:web:cefe12e220a2b4c83528cd"
-  };
+    const firebaseConfig = {
+      apiKey: "AIzaSyAgO8eCKDswsIZ8dLDyaEmgIv8PberVO2w",
+      authDomain: "superbowl-squares-2026.firebaseapp.com",
+      databaseURL: "https://superbowl-squares-2026-default-rtdb.firebaseio.com",
+      projectId: "superbowl-squares-2026",
+      storageBucket: "superbowl-squares-2026.firebasestorage.app",
+      messagingSenderId: "901124318776",
+      appId: "1:901124318776:web:cefe12e220a2b4c83528cd"
+    };
 
     // Change this per year (or per pool)
     const POOL_ID = "superbowl-2026-redzone";
@@ -518,8 +553,9 @@
     const defaultState = () => ({
       team1: "TEAM 1",
       team2: "TEAM 2",
-      colNums: shuffle([...Array(10)].map((_,i)=>i)),
-      rowNums: shuffle([...Array(10)].map((_,i)=>i)),
+      // headers start as blank (admin randomizes later)
+      colNums: Array(10).fill(""),
+      rowNums: Array(10).fill(""),
       squares: Array.from({length:10}, () =>
         Array.from({length:10}, () => ({ name: "", claimedAt: null }))
       ),
@@ -543,6 +579,9 @@
     let app, db, auth;
     let userReady = false;
     let applyingRemote = false;
+
+    // Admin session unlock (for editing areas)
+    let adminUnlocked = false;
 
     /**********************
      * DOM
@@ -602,7 +641,6 @@
       setAccess();
       accessStatus.innerHTML = '<span class="ok">Code accepted.</span>';
 
-      // Initialize + sign in (anonymous)
       try{
         firebaseStatus.textContent = "Connecting…";
         initFirebase();
@@ -656,50 +694,104 @@
       const snap = await get(poolStateRef());
       if (!snap.exists()){
         await set(poolStateRef(), defaultState());
+      }else{
+        // Backward compatibility if older states had numeric headers:
+        const remote = snap.val();
+        if (Array.isArray(remote?.colNums) && remote.colNums.length === 10) {
+          // ok
+        } else if (Array.isArray(remote?.colNums) && remote.colNums.length === 0) {
+          remote.colNums = Array(10).fill("");
+        }
+        if (Array.isArray(remote?.rowNums) && remote.rowNums.length === 10) {
+          // ok
+        } else if (Array.isArray(remote?.rowNums) && remote.rowNums.length === 0) {
+          remote.rowNums = Array(10).fill("");
+        }
       }
     }
 
     function startRealtimeSync(){
-      // Ensure something exists
       bootstrapIfEmpty().catch(console.error);
 
-      // Listen to server updates
       onValue(poolStateRef(), (snap) => {
         const remote = snap.val();
         if (!remote) return;
         applyingRemote = true;
         state = remote;
+        // Ensure headers arrays exist
+        if (!Array.isArray(state.colNums) || state.colNums.length !== 10) state.colNums = Array(10).fill("");
+        if (!Array.isArray(state.rowNums) || state.rowNums.length !== 10) state.rowNums = Array(10).fill("");
         render();
         applyingRemote = false;
       });
     }
 
-    function persistToFirebase(partialOrFull){
+    function persistToFirebase(full){
       if (!userReady || applyingRemote) return;
-      // For simplicity (and to avoid merge issues), write the whole state.
-      // Realtime DB is fast enough for this use-case.
-      set(poolStateRef(), partialOrFull).catch(console.error);
+      set(poolStateRef(), full).catch(console.error);
+    }
+
+    /**********************
+     * ADMIN PASSWORD
+     **********************/
+    function promptAdminPassword(){
+      const entered = prompt("Enter admin password:");
+      return (entered || "").trim() === ADMIN_PASSWORD;
+    }
+
+    function ensureAdminUnlockedOnce(){
+      if (adminUnlocked) return true;
+      const ok = promptAdminPassword();
+      if (ok) adminUnlocked = true;
+      else alert("Incorrect admin password.");
+      return adminUnlocked;
     }
 
     /**********************
      * HEADER BUTTONS
      **********************/
     document.getElementById("randomizeBtn").addEventListener("click", () => {
-      // still admin-gated by #admin in URL
-      if (!isAdmin()) return alert("Admin only. Add #admin to the URL to use admin actions.");
+      // Password required EVERY time
+      if (!promptAdminPassword()) return alert("Incorrect admin password.");
+
       state.colNums = shuffle([...Array(10)].map((_,i)=>i));
       state.rowNums = shuffle([...Array(10)].map((_,i)=>i));
       persistToFirebase(state);
       render();
     });
 
-    document.getElementById("exportBtn").addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "superbowl-squares.json";
-      a.click();
-      URL.revokeObjectURL(a.href);
+    document.getElementById("clearHeadersBtn").addEventListener("click", () => {
+      // Password required EVERY time
+      if (!promptAdminPassword()) return alert("Incorrect admin password.");
+
+      state.colNums = Array(10).fill("");
+      state.rowNums = Array(10).fill("");
+      persistToFirebase(state);
+      render();
+    });
+
+    // Export whole page as an IMAGE (PNG)
+    document.getElementById("exportBtn").addEventListener("click", async () => {
+      try{
+        const root = document.getElementById("pageRoot");
+        const { default: html2canvas } = await import("https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/+esm");
+        const canvas = await html2canvas(root, {
+          backgroundColor: null,
+          scale: Math.min(2, window.devicePixelRatio || 1)
+        });
+
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "redzone-superbowl-squares.png";
+          a.click();
+          URL.revokeObjectURL(a.href);
+        }, "image/png");
+      }catch(e){
+        console.error(e);
+        alert("Export failed. Try again (or export from desktop).");
+      }
     });
 
     /**********************
@@ -727,7 +819,6 @@
       const raw = (nameInput.value || "").trim();
 
       if (!raw) {
-        // clear square
         state.squares[r][c].name = "";
         state.squares[r][c].claimedAt = null;
         persistToFirebase(state);
@@ -771,6 +862,7 @@
       renderScoreTrackerFromState();
       renderWinners();
       renderPayoutFromState();
+      applyAdminLocks();
     }
 
     function renderLabels(){
@@ -783,14 +875,18 @@
     function renderBoard(){
       boardEl.innerHTML = "";
 
-      boardEl.appendChild(div("hcell corner", ""));
+      // Invisible corner placeholder (keeps alignment, not visible)
+      boardEl.appendChild(div("hcell cornerHidden", ""));
 
+      // X header (10)
       for (let c=0; c<10; c++){
-        boardEl.appendChild(div("hcell", "")); // header blank
+        const v = state.colNums?.[c];
+        boardEl.appendChild(div("hcell", (typeof v === "number" ? String(v) : String(v || ""))));
       }
 
       for (let r=0; r<10; r++){
-        boardEl.appendChild(div("lcell", "")); // header blank
+        const rv = state.rowNums?.[r];
+        boardEl.appendChild(div("lcell", (typeof rv === "number" ? String(rv) : String(rv || ""))));
 
         for (let c=0; c<10; c++){
           const sq = state.squares[r][c];
@@ -799,7 +895,6 @@
           cell.innerHTML = (sq.name || "").trim() ? escapeHtml(sq.name) : "Tap to claim";
 
           cell.addEventListener("click", () => {
-            // Access is only requested once on page load; block if not unlocked.
             if (!hasAccess() || !userReady) return;
             openModal(r,c);
           });
@@ -874,19 +969,36 @@
         tr.appendChild(tdOwed);
 
         const tdPaid = document.createElement("td");
-        tdPaid.setAttribute("contenteditable", "true");
         tdPaid.setAttribute("spellcheck", "false");
         tdPaid.dataset.pkey = p ? p.key : "";
         tdPaid.textContent = p ? (state.amountPaid?.[p.key] ?? "") : "";
+
+        // Locked unless adminUnlocked (prompt once per session on first edit attempt)
+        tdPaid.classList.add("locked");
+        tdPaid.contentEditable = adminUnlocked ? "true" : "false";
+
+        tdPaid.addEventListener("focus", () => {
+          if (!tdPaid.dataset.pkey) return;
+          if (adminUnlocked) return;
+          // Prompt once for session unlock
+          if (ensureAdminUnlockedOnce()){
+            applyAdminLocks();
+            tdPaid.focus();
+          } else {
+            tdPaid.blur();
+          }
+        });
+
         tdPaid.addEventListener("blur", () => {
+          if (!adminUnlocked) return;
           const key = tdPaid.dataset.pkey;
           if (!key) return;
           state.amountPaid = state.amountPaid || {};
           state.amountPaid[key] = (tdPaid.textContent || "").trim();
           persistToFirebase(state);
         });
-        tr.appendChild(tdPaid);
 
+        tr.appendChild(tdPaid);
         playersBody.appendChild(tr);
       }
     }
@@ -908,8 +1020,21 @@
     function bindScoreTracker(){
       for (const [team, q, id] of scoreCells){
         const el = document.getElementById(id);
-        el.textContent = state?.scores?.[team]?.[q] || "";
+
+        // gate editing
+        el.addEventListener("focus", () => {
+          if (adminUnlocked) return;
+          if (ensureAdminUnlockedOnce()){
+            applyAdminLocks();
+            el.focus();
+          } else {
+            el.blur();
+          }
+        });
+
         el.addEventListener("input", () => {
+          if (!adminUnlocked) return;
+
           const txt = (el.textContent || "").trim();
           const digit = txt === "" ? "" : txt.replace(/[^0-9]/g, "").slice(-1);
           if (digit !== txt) el.textContent = digit;
@@ -970,7 +1095,7 @@
     }
 
     /**********************
-     * PAYOUT (editable)
+     * PAYOUT (editable - admin only)
      **********************/
     function bindPayout(){
       for (const q of ["q1","q2","q3","q4"]){
@@ -978,19 +1103,27 @@
         const payCell  = document.querySelector(`[data-ppay="${q}"]`);
         if (!nameCell || !payCell) continue;
 
-        nameCell.textContent = state?.payout?.[q]?.name || "";
-        payCell.textContent  = state?.payout?.[q]?.payout || "";
+        const guard = (el) => {
+          el.addEventListener("focus", () => {
+            if (adminUnlocked) return;
+            if (ensureAdminUnlockedOnce()){
+              applyAdminLocks();
+              el.focus();
+            } else {
+              el.blur();
+            }
+          });
+          el.addEventListener("blur", () => {
+            if (!adminUnlocked) return;
+            state.payout = state.payout || { q1:{name:"",payout:""}, q2:{name:"",payout:""}, q3:{name:"",payout:""}, q4:{name:"",payout:""} };
+            state.payout[q].name = (nameCell.textContent || "").trim();
+            state.payout[q].payout = (payCell.textContent || "").trim();
+            persistToFirebase(state);
+          });
+        };
 
-        nameCell.addEventListener("blur", () => {
-          state.payout = state.payout || { q1:{name:"",payout:""}, q2:{name:"",payout:""}, q3:{name:"",payout:""}, q4:{name:"",payout:""} };
-          state.payout[q].name = (nameCell.textContent || "").trim();
-          persistToFirebase(state);
-        });
-        payCell.addEventListener("blur", () => {
-          state.payout = state.payout || { q1:{name:"",payout:""}, q2:{name:"",payout:""}, q3:{name:"",payout:""}, q4:{name:"",payout:""} };
-          state.payout[q].payout = (payCell.textContent || "").trim();
-          persistToFirebase(state);
-        });
+        guard(nameCell);
+        guard(payCell);
       }
     }
 
@@ -1004,10 +1137,30 @@
     }
 
     /**********************
-     * ADMIN
+     * Apply admin locks to editables
      **********************/
-    function isAdmin(){
-      return (location.hash || "").toLowerCase().includes("admin");
+    function applyAdminLocks(){
+      // Score tracker cells
+      for (const [, , id] of scoreCells){
+        const el = document.getElementById(id);
+        if (!el) continue;
+        el.contentEditable = adminUnlocked ? "true" : "false";
+      }
+
+      // Payout cells
+      for (const q of ["q1","q2","q3","q4"]){
+        const nameCell = document.querySelector(`[data-pname="${q}"]`);
+        const payCell  = document.querySelector(`[data-ppay="${q}"]`);
+        if (nameCell) nameCell.contentEditable = adminUnlocked ? "true" : "false";
+        if (payCell)  payCell.contentEditable  = adminUnlocked ? "true" : "false";
+      }
+
+      // Amount Paid cells in Players table
+      const paidCells = playersBody.querySelectorAll('td[data-pkey]');
+      paidCells.forEach(td => {
+        td.contentEditable = (adminUnlocked && td.dataset.pkey) ? "true" : "false";
+        if (!adminUnlocked) td.classList.add("locked"); else td.classList.remove("locked");
+      });
     }
 
     /**********************
@@ -1035,15 +1188,12 @@
     /**********************
      * INIT
      **********************/
-    // Bind editable tables once
     bindScoreTracker();
     bindPayout();
 
-    // If already unlocked on this device, connect immediately; otherwise show access modal.
     if (!hasAccess()) {
       showAccess();
     } else {
-      // connect immediately
       try{
         initFirebase();
         await ensureSignedIn();
@@ -1054,7 +1204,6 @@
       }
     }
 
-    // Initial render (will be overwritten by Firebase listener once connected)
     render();
   </script>
 </body>
