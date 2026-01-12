@@ -18,7 +18,6 @@
       --cellTaken:#111827;
       --cellHover:#16213a;
       --radius:14px;
-
       --attention:#fbbf24;
     }
     *{box-sizing:border-box}
@@ -28,11 +27,7 @@
       background: radial-gradient(1200px 600px at 20% 0%, #132033 0%, var(--bg) 55%) fixed;
       color:var(--text);
     }
-    .wrap{
-      max-width: 1100px;
-      margin: 22px auto;
-      padding: 0 14px 28px;
-    }
+    .wrap{max-width:1100px; margin:22px auto; padding:0 14px 28px;}
     header{
       background: linear-gradient(180deg, rgba(34,197,94,.12), rgba(96,165,250,.08));
       border:1px solid rgba(255,255,255,.08);
@@ -44,29 +39,18 @@
       display:flex;
       align-items:flex-start;
       justify-content:space-between;
-      gap:12px;
+      gap:14px;
       flex-wrap:wrap;
     }
-    h1{
-      font-size: 18px;
-      margin:0 0 6px 0;
-      letter-spacing:.2px;
-    }
-    .sub{
-      color:var(--muted);
-      font-size: 13px;
-      line-height:1.35;
-    }
+    h1{font-size:18px; margin:0 0 6px 0; letter-spacing:.2px;}
+    .sub{color:var(--muted); font-size:13px; line-height:1.35;}
     .sub.attention{
       color: var(--attention);
       font-weight: 900;
       letter-spacing: .15px;
       text-shadow: 0 1px 0 rgba(0,0,0,.35);
     }
-    .pillRow{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-      margin-top:10px;
-    }
+    .pillRow{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:10px;}
     .pill{
       background: rgba(255,255,255,.06);
       border:1px solid rgba(255,255,255,.08);
@@ -82,74 +66,59 @@
     .pill b{color: var(--accent)}
     .btn{
       cursor:pointer;
-      border-radius: 10px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255,255,255,.12);
+      border-radius:10px;
+      padding:10px 12px;
+      border:1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
       color: var(--text);
       font-weight: 600;
       font-size: 13px;
       user-select:none;
-      white-space:nowrap;
+      white-space: nowrap;
     }
     .btn:hover{background: rgba(255,255,255,.10)}
-    .btn.primary{
-      background: rgba(34,197,94,.18);
-      border-color: rgba(34,197,94,.35);
-    }
-    .btn.subtle{
-      background: rgba(96,165,250,.10);
-      border-color: rgba(96,165,250,.22);
-    }
+    .btn.primary{background: rgba(34,197,94,.18); border-color: rgba(34,197,94,.35);}
+    .btn.subtle{background: rgba(96,165,250,.10); border-color: rgba(96,165,250,.22);}
+    .btn.warn{background: rgba(251,191,36,.12); border-color: rgba(251,191,36,.30);}
+    .btn.danger{background: rgba(239,68,68,.14); border-color: rgba(239,68,68,.30);}
 
-    /* Admin settings panel */
-    .adminPanel{
+    .adminBox{
+      min-width: 290px;
       background: rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.08);
       border-radius: 14px;
       padding: 10px;
-      min-width: 260px;
     }
-    .adminPanelHeader{
+    .adminBox h3{
+      margin:0 0 8px 0;
+      font-size: 12px;
+      letter-spacing:.2px;
+      color:#e5e7eb;
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
-      margin-bottom:8px;
     }
-    .adminTitle{
-      font-size: 12px;
-      letter-spacing:.3px;
-      color: rgba(229,231,235,.9);
-      font-weight: 900;
-      text-transform: uppercase;
-    }
-    .adminStatus{
-      font-size: 12px;
+    .adminBox .adminHint{
+      font-size: 11px;
       color: var(--muted);
-      display:flex;
-      align-items:center;
-      gap:6px;
-      user-select:none;
+      font-weight: 700;
     }
-    .dot{
-      width:8px;height:8px;border-radius:999px;
-      background: rgba(239,68,68,.95);
-      box-shadow: 0 0 0 3px rgba(239,68,68,.15);
-    }
-    .dot.ok{
-      background: rgba(34,197,94,.95);
-      box-shadow: 0 0 0 3px rgba(34,197,94,.18);
-    }
-    .adminButtons{
+    .adminBtns{
       display:flex;
       gap:8px;
       flex-wrap:wrap;
       justify-content:flex-end;
     }
+    .publicBtns{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
 
     .gridCard{
-      margin-top: 16px;
+      margin-top:16px;
       background: rgba(18,24,38,.72);
       border:1px solid rgba(255,255,255,.08);
       border-radius: var(--radius);
@@ -157,181 +126,95 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.25);
     }
 
-    .boardHeader{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:flex-start;
-      margin-bottom: 10px;
-    }
-
     .teamInput{
-      display:flex;
-      align-items:center;
-      gap:8px;
+      display:flex; align-items:center; gap:8px;
       background: rgba(255,255,255,.05);
       border:1px solid rgba(255,255,255,.08);
-      padding: 8px 10px;
+      padding:8px 10px;
       border-radius: 12px;
       user-select:none;
     }
     .teamInput label{font-size:12px; color:var(--muted)}
     .teamInput input{
-      width: 160px;
-      border:none;
-      outline:none;
-      background: transparent;
-      color: var(--text);
-      font-weight:700;
-      font-size: 13px;
+      width:160px; border:none; outline:none; background:transparent;
+      color:var(--text); font-weight:700; font-size:13px;
     }
 
-    .boardArea{
-      position: relative;
-      padding-top: 54px;
-      padding-left: 60px;
-    }
-    .team1Top{
-      position:absolute;
-      top: 0;
-      left: 60px;
-      right: 0;
-      display:flex;
-      justify-content:center;
-      pointer-events:auto;
-    }
-    .team2Side{
-      position:absolute;
-      top: 54px;
-      left: 0;
-      bottom: 0;
-      width: 60px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      pointer-events:auto;
-    }
-    .team2Side .teamInput{
-      transform: rotate(-90deg);
-      transform-origin: center;
-    }
+    .boardArea{position:relative; padding-top:54px; padding-left:60px;}
+    .team1Top{position:absolute; top:0; left:60px; right:0; display:flex; justify-content:center; pointer-events:auto;}
+    .team2Side{position:absolute; top:54px; left:0; bottom:0; width:60px; display:flex; align-items:center; justify-content:center; pointer-events:auto;}
+    .team2Side .teamInput{transform: rotate(-90deg); transform-origin:center;}
 
-    .boardScroll{
-      overflow-x:auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 6px;
-    }
-    .boardScroll::-webkit-scrollbar{ height: 8px; }
-    .boardScroll::-webkit-scrollbar-thumb{
-      background: rgba(255,255,255,.12);
-      border-radius: 999px;
-    }
+    .boardScroll{overflow-x:auto; -webkit-overflow-scrolling: touch; padding-bottom:6px;}
+    .boardScroll::-webkit-scrollbar{height:8px;}
+    .boardScroll::-webkit-scrollbar-thumb{background: rgba(255,255,255,.12); border-radius:999px;}
 
     .board{
       display:grid;
       grid-template-columns: 48px repeat(10, minmax(0, 1fr));
-      gap: 6px;
+      gap:6px;
       border-top: 1px solid rgba(255,255,255,.06);
-      padding-top: 10px;
-      min-width: 760px;
+      padding-top:10px;
+      min-width:760px;
     }
-    .hcell, .lcell, .cell{
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,.08);
-      min-height: 46px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding: 6px;
-      line-height:1.05;
+    .hcell,.lcell,.cell{
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.08);
+      min-height:46px;
+      display:flex; align-items:center; justify-content:center;
+      text-align:center; padding:6px; line-height:1.05;
     }
-    .hcell, .lcell{
+    .hcell,.lcell{
       background: rgba(96,165,250,.10);
       border-color: rgba(96,165,250,.22);
-      font-weight: 800;
-      color: #dbeafe;
+      font-weight:800; color:#dbeafe;
       user-select:none;
     }
     .cornerHidden{
       background: transparent !important;
       border-color: transparent !important;
-      box-shadow: none !important;
+      box-shadow:none !important;
       color: transparent !important;
     }
-
     .cell{
       background: rgba(15,23,42,.85);
       cursor:pointer;
       transition: background .12s ease, border-color .12s ease;
-      font-size: 12px;
-      font-weight: 700;
+      font-size:12px; font-weight:700;
       word-break: break-word;
     }
-    .cell:hover{
-      background: rgba(22,33,58,.95);
-      border-color: rgba(255,255,255,.16);
-    }
+    .cell:hover{background: rgba(22,33,58,.95); border-color: rgba(255,255,255,.16);}
     .cell.taken{
       background: rgba(34,197,94,.18);
       border-color: rgba(34,197,94,.35);
       box-shadow: 0 0 0 1px rgba(34,197,94,.10) inset;
-      opacity: 1;
-      cursor:pointer;
+      opacity:1;
+    }
+    .cell.locked{
+      cursor:not-allowed;
+      opacity:.75;
+    }
+    .cell.locked:hover{
+      background: rgba(15,23,42,.85);
+      border-color: rgba(255,255,255,.08);
     }
 
-    .sectionTitle{
-      margin-top: 14px;
-      font-size: 13px;
-      letter-spacing:.2px;
-      color: #e5e7eb;
-      font-weight: 800;
-    }
-
-    .panel{
-      background: rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: 14px;
-      padding: 12px;
-    }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size: 12px;
-    }
-    th, td{
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      padding: 8px 6px;
-      text-align:left;
-      color: var(--text);
-      vertical-align: top;
-    }
-    th{color: var(--muted); font-weight:700}
-
-    .note{
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 8px;
-      line-height:1.35;
-    }
-
-    .bottomRow{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
+    .sectionTitle{margin-top:14px; font-size:13px; letter-spacing:.2px; color:#e5e7eb; font-weight:800;}
+    .panel{background: rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08); border-radius:14px; padding:12px;}
+    table{width:100%; border-collapse:collapse; font-size:12px;}
+    th,td{border-bottom:1px solid rgba(255,255,255,.06); padding:8px 6px; text-align:left; color:var(--text); vertical-align:top;}
+    th{color:var(--muted); font-weight:700;}
+    .note{color:var(--muted); font-size:12px; margin-top:8px; line-height:1.35;}
+    .bottomRow{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;}
 
     @media (max-width: 900px){
-      .bottomRow{grid-template-columns: 1fr;}
-      .teamInput input{width: 140px;}
-      .boardArea{padding-left: 54px;}
-      .team1Top{left: 54px;}
-      .team2Side{width: 54px;}
-      .board{ min-width: 760px; }
-      .adminPanel{width:100%;}
-      .adminButtons{justify-content:flex-start;}
+      .bottomRow{grid-template-columns:1fr;}
+      .teamInput input{width:140px;}
+      .boardArea{padding-left:54px;}
+      .team1Top{left:54px;}
+      .team2Side{width:54px;}
+      .board{min-width:760px;}
+      .adminBox{width:100%;}
     }
 
     .modalBack{
@@ -340,56 +223,41 @@
       display:none;
       align-items:center;
       justify-content:center;
-      padding: 16px;
-      z-index: 50;
+      padding:16px;
+      z-index:50;
     }
     .modal{
-      width: 100%;
-      max-width: 420px;
+      width:100%;
+      max-width:420px;
       background: rgba(18,24,38,.98);
       border:1px solid rgba(255,255,255,.10);
-      border-radius: 16px;
-      padding: 14px;
+      border-radius:16px;
+      padding:14px;
       box-shadow: 0 20px 60px rgba(0,0,0,.35);
     }
-    .modal h3{margin:0 0 8px 0; font-size: 15px}
-    .modal .meta{color: var(--muted); font-size: 12px; margin-bottom: 10px}
+    .modal h3{margin:0 0 8px 0; font-size:15px}
+    .modal .meta{color: var(--muted); font-size:12px; margin-bottom:10px}
     .modal input{
       width:100%;
-      padding: 10px 12px;
-      border-radius: 12px;
+      padding:10px 12px;
+      border-radius:12px;
       border:1px solid rgba(255,255,255,.12);
       background: rgba(255,255,255,.06);
       outline:none;
       color: var(--text);
       font-weight:700;
     }
-    .modal .row{
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      margin-top: 10px;
-    }
-    .status{
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--muted);
-    }
+    .modal .row{display:flex; justify-content:flex-end; gap:10px; margin-top:10px;}
+    .status{margin-top:10px; font-size:12px; color: var(--muted);}
     .status .ok{color: var(--accent)}
     .status .bad{color: var(--danger)}
 
-    td[contenteditable="true"]{
-      outline: none;
-      border-radius: 8px;
-    }
+    td[contenteditable="true"]{outline:none; border-radius:8px;}
     td[contenteditable="true"]:focus{
       box-shadow: 0 0 0 2px rgba(96,165,250,.35);
       background: rgba(255,255,255,.04);
     }
-    td.locked{
-      cursor:not-allowed;
-      opacity: .85;
-    }
+    td.locked{cursor:not-allowed;}
   </style>
 </head>
 
@@ -397,50 +265,43 @@
   <div class="wrap" id="pageRoot">
     <header>
       <div class="topRow">
-        <div>
+        <div style="min-width: 280px;">
           <h1>Redzone Super Bowl Squares</h1>
           <div class="sub attention">
             TYPE YOUR NAME IN THE SQUARE(S) YOU WANT TO SELECT. <b>$10 / square</b>. First come, first served.
           </div>
+
           <div class="pillRow">
             <div class="pill">Blank Squares: <b id="blankCount">100</b></div>
             <div class="pill">Squares Selected: <b id="selectedCount">0</b></div>
             <div class="pill">Total Pot: <b id="totalPot">$0</b></div>
           </div>
-        </div>
 
-        <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
-          <!-- Public action -->
-          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; justify-content:flex-end;">
+          <div class="publicBtns" style="margin-top:10px;">
             <button class="btn" id="exportBtn" title="Download an image of the page">Export Image</button>
           </div>
+        </div>
 
-          <!-- Admin settings (separated) -->
-          <div class="adminPanel">
-            <div class="adminPanelHeader">
-              <div class="adminTitle">Admin Settings</div>
-              <div class="adminStatus">
-                <span class="dot" id="adminDot"></span>
-                <span id="adminLabel">Locked</span>
-              </div>
-            </div>
-            <div class="adminButtons">
-              <button class="btn primary" id="adminUnlockBtn" title="Unlock admin editing">Admin Unlock</button>
-              <button class="btn primary" id="randomizeBtn" title="Randomize header numbers (admin)">Randomize 0–9</button>
-              <button class="btn subtle" id="clearHeadersBtn" title="Clear header rows (admin)">Clear header rows</button>
-            </div>
+        <!-- ✅ Admin settings moved to the RIGHT of header block -->
+        <div class="adminBox">
+          <h3>
+            Admin settings
+            <span class="adminHint" id="lockBadge">UNLOCKED: NO • BOARD: OPEN</span>
+          </h3>
+          <div class="adminBtns">
+            <button class="btn subtle" id="adminUnlockBtn" title="Unlock admin editing for this device">Admin Unlock</button>
+            <button class="btn warn" id="lockBoardBtn" title="Lock/unlock board (admin)">Lock Board</button>
+            <button class="btn primary" id="randomizeBtn" title="Randomize header numbers (admin)">Randomize 0–9</button>
+            <button class="btn subtle" id="clearHeadersBtn" title="Clear header rows (admin)">Clear header rows</button>
+          </div>
+          <div class="note" style="margin-top:8px;">
+            Please send your payments to taynikita@gmailcom
           </div>
         </div>
-      </div>
-
-      <div class="note">
-        Please send your payments to taynikita@gmailcom
       </div>
     </header>
 
     <div class="gridCard">
-      <div class="boardHeader"></div>
-
       <div class="boardArea">
         <div class="team1Top">
           <div class="teamInput">
@@ -575,7 +436,9 @@
      * CONFIG
      **********************/
     const PRICE_PER_SQUARE = 10;
-    const POOL_ACCESS_CODE = "TEST01";
+
+    // ✅ Access code updated
+    const POOL_ACCESS_CODE = "REDZONE2026";
     const ACCESS_VERSION = "v1";
 
     const ADMIN_PASSWORD = "Edem";
@@ -600,11 +463,15 @@
     const defaultState = () => ({
       team1: "TEAM 1",
       team2: "TEAM 2",
+
+      // headers start as blank (admin randomizes later)
       colNums: Array(10).fill(""),
       rowNums: Array(10).fill(""),
+
       squares: Array.from({length:10}, () =>
         Array.from({length:10}, () => ({ name: "", claimedAt: null }))
       ),
+
       amountPaid: {},
       payout: {
         q1: { name: "", payout: "" },
@@ -615,17 +482,21 @@
       scores: {
         t1: { q1:"", q2:"", q3:"", q4:"" },
         t2: { q1:"", q2:"", q3:"", q4:"" }
-      }
+      },
+
+      // ✅ NEW: server-wide board lock (applies to everyone)
+      locked: false
     });
 
     let state = defaultState();
     let selected = {r:null, c:null};
 
+    // Firebase handles
     let app, db, auth;
     let userReady = false;
     let applyingRemote = false;
 
-    // Admin session unlock (button-controlled)
+    // Admin session unlock (for editing areas)
     let adminUnlocked = false;
 
     /**********************
@@ -657,10 +528,10 @@
     const accessBtn = document.getElementById("accessBtn");
     const firebaseStatus = document.getElementById("firebaseStatus");
 
-    // Admin UI
+    // Admin header
     const adminUnlockBtn = document.getElementById("adminUnlockBtn");
-    const adminDot = document.getElementById("adminDot");
-    const adminLabel = document.getElementById("adminLabel");
+    const lockBoardBtn = document.getElementById("lockBoardBtn");
+    const lockBadge = document.getElementById("lockBadge");
 
     /**********************
      * ACCESS CODE (once on page load)
@@ -755,8 +626,12 @@
         if (!remote) return;
         applyingRemote = true;
         state = remote;
+
+        // Ensure arrays/fields exist (older states)
         if (!Array.isArray(state.colNums) || state.colNums.length !== 10) state.colNums = Array(10).fill("");
         if (!Array.isArray(state.rowNums) || state.rowNums.length !== 10) state.rowNums = Array(10).fill("");
+        if (typeof state.locked !== "boolean") state.locked = false;
+
         render();
         applyingRemote = false;
       });
@@ -768,44 +643,55 @@
     }
 
     /**********************
-     * ADMIN UNLOCK (button)
+     * ADMIN PASSWORD
      **********************/
-    function updateAdminBadge(){
-      if (adminUnlocked){
-        adminDot.classList.add("ok");
-        adminLabel.textContent = "Unlocked";
-      }else{
-        adminDot.classList.remove("ok");
-        adminLabel.textContent = "Locked";
-      }
-    }
-
     function promptAdminPassword(){
       const entered = prompt("Enter admin password:");
       return (entered || "").trim() === ADMIN_PASSWORD;
     }
 
-    adminUnlockBtn.addEventListener("click", () => {
-      if (adminUnlocked) return; // already unlocked
-      if (!promptAdminPassword()) {
-        alert("Incorrect admin password.");
-        return;
-      }
-      adminUnlocked = true;
-      updateAdminBadge();
-      applyAdminLocks(); // enable editing immediately
-      alert("Admin unlocked on this device (until refresh).");
-    });
+    function ensureAdminUnlockedOnce(){
+      if (adminUnlocked) return true;
+      const ok = promptAdminPassword();
+      if (ok) adminUnlocked = true;
+      else alert("Incorrect admin password.");
+      renderAdminBadge();
+      return adminUnlocked;
+    }
+
+    function renderAdminBadge(){
+      const unlockedTxt = adminUnlocked ? "YES" : "NO";
+      const boardTxt = state.locked ? "LOCKED" : "OPEN";
+      lockBadge.textContent = `UNLOCKED: ${unlockedTxt} • BOARD: ${boardTxt}`;
+    }
 
     /**********************
-     * HEADER BUTTONS (admin-gated)
+     * ADMIN SETTINGS BUTTONS
      **********************/
+    adminUnlockBtn.addEventListener("click", () => {
+      ensureAdminUnlockedOnce();
+      applyAdminLocks();
+      renderAdminBadge();
+    });
+
+    // ✅ NEW: Lock Board button (password each time)
+    lockBoardBtn.addEventListener("click", () => {
+      if (!promptAdminPassword()) return alert("Incorrect admin password.");
+
+      // When you lock/unlock the board, we also grant adminUnlocked to this device
+      // so you can still edit while everyone else is blocked.
+      adminUnlocked = true;
+
+      state.locked = !state.locked;
+      persistToFirebase(state);
+      render();
+    });
+
     document.getElementById("randomizeBtn").addEventListener("click", () => {
-      // Must be admin-unlocked first
-      if (!adminUnlocked) {
-        alert("Admin Unlock required.");
-        return;
-      }
+      // Password required EVERY time
+      if (!promptAdminPassword()) return alert("Incorrect admin password.");
+
+      // Ensure unique 0-9 per axis
       state.colNums = shuffle([...Array(10)].map((_,i)=>i));
       state.rowNums = shuffle([...Array(10)].map((_,i)=>i));
       persistToFirebase(state);
@@ -813,10 +699,9 @@
     });
 
     document.getElementById("clearHeadersBtn").addEventListener("click", () => {
-      if (!adminUnlocked) {
-        alert("Admin Unlock required.");
-        return;
-      }
+      // Password required EVERY time
+      if (!promptAdminPassword()) return alert("Incorrect admin password.");
+
       state.colNums = Array(10).fill("");
       state.rowNums = Array(10).fill("");
       persistToFirebase(state);
@@ -851,6 +736,7 @@
      * TEAM NAMES
      **********************/
     team1El.addEventListener("input", () => {
+      // optional: you could lock these too, but leaving as-is for now
       state.team1 = team1El.value.trim() || "TEAM 1";
       persistToFirebase(state); renderLabels();
     });
@@ -868,6 +754,12 @@
     confirmBtn.addEventListener("click", () => {
       const r = selected.r, c = selected.c;
       if (r === null || c === null) return;
+
+      // If board is locked and you're not admin-unlocked, block save
+      if (state.locked && !adminUnlocked) {
+        modalStatus.innerHTML = '<span class="bad">Board is locked.</span>';
+        return;
+      }
 
       const raw = (nameInput.value || "").trim();
 
@@ -889,6 +781,12 @@
     });
 
     function openModal(r,c){
+      // If board is locked and you're not admin-unlocked, block edit
+      if (state.locked && !adminUnlocked) {
+        alert("Board is locked.");
+        return;
+      }
+
       selected = {r,c};
       nameInput.value = state.squares[r][c].name || "";
       modalStatus.textContent = "";
@@ -905,54 +803,6 @@
     }
 
     /**********************
-     * SCORE + PAYOUT BINDING
-     **********************/
-    const scoreCells = [
-      ["t1","q1","t1q1"],["t1","q2","t1q2"],["t1","q3","t1q3"],["t1","q4","t1q4"],
-      ["t2","q1","t2q1"],["t2","q2","t2q2"],["t2","q3","t2q3"],["t2","q4","t2q4"],
-    ];
-
-    function bindScoreTracker(){
-      for (const [team, q, id] of scoreCells){
-        const el = document.getElementById(id);
-
-        // keep input handlers always attached
-        el.addEventListener("input", () => {
-          if (!adminUnlocked) return;
-
-          const txt = (el.textContent || "").trim();
-          const digit = txt === "" ? "" : txt.replace(/[^0-9]/g, "").slice(-1);
-          if (digit !== txt) el.textContent = digit;
-
-          state.scores = state.scores || { t1:{q1:"",q2:"",q3:"",q4:""}, t2:{q1:"",q2:"",q3:"",q4:""} };
-          state.scores[team][q] = digit;
-
-          persistToFirebase(state);
-          renderWinners();
-        });
-      }
-    }
-
-    function bindPayout(){
-      for (const q of ["q1","q2","q3","q4"]){
-        const nameCell = document.querySelector(`[data-pname="${q}"]`);
-        const payCell  = document.querySelector(`[data-ppay="${q}"]`);
-        if (!nameCell || !payCell) continue;
-
-        const save = () => {
-          if (!adminUnlocked) return;
-          state.payout = state.payout || { q1:{name:"",payout:""}, q2:{name:"",payout:""}, q3:{name:"",payout:""}, q4:{name:"",payout:""} };
-          state.payout[q].name = (nameCell.textContent || "").trim();
-          state.payout[q].payout = (payCell.textContent || "").trim();
-          persistToFirebase(state);
-        };
-
-        nameCell.addEventListener("blur", save);
-        payCell.addEventListener("blur", save);
-      }
-    }
-
-    /**********************
      * RENDER
      **********************/
     function render(){
@@ -964,7 +814,7 @@
       renderWinners();
       renderPayoutFromState();
       applyAdminLocks();
-      updateAdminBadge();
+      renderAdminBadge();
     }
 
     function renderLabels(){
@@ -976,6 +826,7 @@
 
     function renderBoard(){
       boardEl.innerHTML = "";
+
       boardEl.appendChild(div("hcell cornerHidden", ""));
 
       for (let c=0; c<10; c++){
@@ -990,11 +841,19 @@
         for (let c=0; c<10; c++){
           const sq = state.squares[r][c];
           const cell = document.createElement("div");
-          cell.className = "cell" + ((sq.name || "").trim() ? " taken" : "");
-          cell.innerHTML = (sq.name || "").trim() ? escapeHtml(sq.name) : "Tap to claim";
+          const hasName = ((sq.name || "").trim().length > 0);
+
+          // Add a visual locked state (for non-admin) when board is locked
+          const lockedClass = (state.locked && !adminUnlocked) ? " locked" : "";
+          cell.className = "cell" + (hasName ? " taken" : "") + lockedClass;
+          cell.innerHTML = hasName ? escapeHtml(sq.name) : "Tap to claim";
 
           cell.addEventListener("click", () => {
             if (!hasAccess() || !userReady) return;
+            if (state.locked && !adminUnlocked) {
+              alert("Board is locked.");
+              return;
+            }
             openModal(r,c);
           });
 
@@ -1072,7 +931,20 @@
         tdPaid.dataset.pkey = p ? p.key : "";
         tdPaid.textContent = p ? (state.amountPaid?.[p.key] ?? "") : "";
 
-        // IMPORTANT: do not prompt on focus anymore
+        tdPaid.classList.add("locked");
+        tdPaid.contentEditable = adminUnlocked ? "true" : "false";
+
+        tdPaid.addEventListener("focus", () => {
+          if (!tdPaid.dataset.pkey) return;
+          if (adminUnlocked) return;
+          if (ensureAdminUnlockedOnce()){
+            applyAdminLocks();
+            tdPaid.focus();
+          } else {
+            tdPaid.blur();
+          }
+        });
+
         tdPaid.addEventListener("blur", () => {
           if (!adminUnlocked) return;
           const key = tdPaid.dataset.pkey;
@@ -1094,8 +966,43 @@
     }
 
     /**********************
-     * SCORE + PAYOUT RENDER
+     * SCORE TRACKER
      **********************/
+    const scoreCells = [
+      ["t1","q1","t1q1"],["t1","q2","t1q2"],["t1","q3","t1q3"],["t1","q4","t1q4"],
+      ["t2","q1","t2q1"],["t2","q2","t2q2"],["t2","q3","t2q3"],["t2","q4","t2q4"],
+    ];
+
+    function bindScoreTracker(){
+      for (const [team, q, id] of scoreCells){
+        const el = document.getElementById(id);
+
+        el.addEventListener("focus", () => {
+          if (adminUnlocked) return;
+          if (ensureAdminUnlockedOnce()){
+            applyAdminLocks();
+            el.focus();
+          } else {
+            el.blur();
+          }
+        });
+
+        el.addEventListener("input", () => {
+          if (!adminUnlocked) return;
+
+          const txt = (el.textContent || "").trim();
+          const digit = txt === "" ? "" : txt.replace(/[^0-9]/g, "").slice(-1);
+          if (digit !== txt) el.textContent = digit;
+
+          state.scores = state.scores || { t1:{q1:"",q2:"",q3:"",q4:""}, t2:{q1:"",q2:"",q3:"",q4:""} };
+          state.scores[team][q] = digit;
+
+          persistToFirebase(state);
+          renderWinners();
+        });
+      }
+    }
+
     function renderScoreTrackerFromState(){
       for (const [team, q, id] of scoreCells){
         const el = document.getElementById(id);
@@ -1104,6 +1011,9 @@
       }
     }
 
+    /**********************
+     * WINNER CALCULATION
+     **********************/
     function renderWinners(){
       const qs = ["q1","q2","q3","q4"];
       for (const q of qs){
@@ -1139,6 +1049,39 @@
       return -1;
     }
 
+    /**********************
+     * PAYOUT (editable - admin only)
+     **********************/
+    function bindPayout(){
+      for (const q of ["q1","q2","q3","q4"]){
+        const nameCell = document.querySelector(`[data-pname="${q}"]`);
+        const payCell  = document.querySelector(`[data-ppay="${q}"]`);
+        if (!nameCell || !payCell) continue;
+
+        const guard = (el) => {
+          el.addEventListener("focus", () => {
+            if (adminUnlocked) return;
+            if (ensureAdminUnlockedOnce()){
+              applyAdminLocks();
+              el.focus();
+            } else {
+              el.blur();
+            }
+          });
+          el.addEventListener("blur", () => {
+            if (!adminUnlocked) return;
+            state.payout = state.payout || { q1:{name:"",payout:""}, q2:{name:"",payout:""}, q3:{name:"",payout:""}, q4:{name:"",payout:""} };
+            state.payout[q].name = (nameCell.textContent || "").trim();
+            state.payout[q].payout = (payCell.textContent || "").trim();
+            persistToFirebase(state);
+          });
+        };
+
+        guard(nameCell);
+        guard(payCell);
+      }
+    }
+
     function renderPayoutFromState(){
       for (const q of ["q1","q2","q3","q4"]){
         const nameCell = document.querySelector(`[data-pname="${q}"]`);
@@ -1149,7 +1092,7 @@
     }
 
     /**********************
-     * Locks: only enabled after Admin Unlock button is used
+     * Apply admin locks to editables
      **********************/
     function applyAdminLocks(){
       // Score tracker cells
@@ -1157,28 +1100,20 @@
         const el = document.getElementById(id);
         if (!el) continue;
         el.contentEditable = adminUnlocked ? "true" : "false";
-        if (!adminUnlocked) el.classList.add("locked"); else el.classList.remove("locked");
       }
 
       // Payout cells
       for (const q of ["q1","q2","q3","q4"]){
         const nameCell = document.querySelector(`[data-pname="${q}"]`);
         const payCell  = document.querySelector(`[data-ppay="${q}"]`);
-        if (nameCell){
-          nameCell.contentEditable = adminUnlocked ? "true" : "false";
-          if (!adminUnlocked) nameCell.classList.add("locked"); else nameCell.classList.remove("locked");
-        }
-        if (payCell){
-          payCell.contentEditable = adminUnlocked ? "true" : "false";
-          if (!adminUnlocked) payCell.classList.add("locked"); else payCell.classList.remove("locked");
-        }
+        if (nameCell) nameCell.contentEditable = adminUnlocked ? "true" : "false";
+        if (payCell)  payCell.contentEditable  = adminUnlocked ? "true" : "false";
       }
 
-      // Amount Paid cells in Players table (only rows with a real player key)
+      // Amount Paid cells in Players table
       const paidCells = playersBody.querySelectorAll('td[data-pkey]');
       paidCells.forEach(td => {
-        const canEdit = adminUnlocked && !!td.dataset.pkey;
-        td.contentEditable = canEdit ? "true" : "false";
+        td.contentEditable = (adminUnlocked && td.dataset.pkey) ? "true" : "false";
         if (!adminUnlocked) td.classList.add("locked"); else td.classList.remove("locked");
       });
     }
@@ -1210,8 +1145,8 @@
      **********************/
     bindScoreTracker();
     bindPayout();
-    updateAdminBadge();
 
+    // If already unlocked on this device, connect immediately; otherwise show access modal.
     if (!hasAccess()) {
       showAccess();
     } else {
