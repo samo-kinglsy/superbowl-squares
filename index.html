@@ -496,6 +496,7 @@
      **********************/
     const PRICE_PER_SQUARE = 10;
     const POOL_ACCESS_CODE = "REDZONE2026";
+    const ACCESS_VERSION = "v1";
 
     // 🔧 Replace with YOUR Firebase config (Project settings → Web app)
   const firebaseConfig = {
@@ -576,10 +577,10 @@
      * ACCESS CODE (once on page load)
      **********************/
     function hasAccess(){
-      return localStorage.getItem("sb_pool_access_ok") === "1";
+      return localStorage.getItem(`sb_pool_access_ok_${ACCESS_VERSION}`) === "1";
     }
     function setAccess(){
-      localStorage.setItem("sb_pool_access_ok", "1");
+      localStorage.setItem(`sb_pool_access_ok_${ACCESS_VERSION}`, "1");
     }
     function showAccess(){
       accessBack.style.display = "flex";
