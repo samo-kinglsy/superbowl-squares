@@ -1,662 +1,319 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Super Bowl Squares</title>
-  <style>
-    :root{
-      --bg:#0b0f14;
-      --card:#121826;
-      --muted:#98a2b3;
-      --text:#e6eaf2;
-      --accent:#22c55e;
-      --accent2:#60a5fa;
-      --danger:#ef4444;
-      --grid:#2a3445;
-      --cell:#0f172a;
-      --cellTaken:#111827;
-      --cellHover:#16213a;
-      --radius:14px;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 20% 0%, #132033 0%, var(--bg) 55%) fixed;
-      color:var(--text);
-    }
-    .wrap{
-      max-width: 1100px;
-      margin: 22px auto;
-      padding: 0 14px 28px;
-    }
-    header{
-      background: linear-gradient(180deg, rgba(34,197,94,.12), rgba(96,165,250,.08));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
-      padding: 14px 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-    }
-    .topRow{
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-    }
-    h1{
-      font-size: 18px;
-      margin:0 0 6px 0;
-      letter-spacing:.2px;
-    }
-    .sub{
-      color:var(--muted);
-      font-size: 13px;
-      line-height:1.35;
-    }
-    .pillRow{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-      margin-top:10px;
-    }
-    .pill{
-      background: rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.08);
-      padding: 8px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: var(--text);
-      display:flex;
-      gap:8px;
-      align-items:center;
-      user-select:none;
-    }
-    .pill b{color: var(--accent)}
-    .btn{
-      cursor:pointer;
-      border-radius: 10px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      font-weight: 600;
-      font-size: 13px;
-      user-select:none;
-    }
-    .btn:hover{background: rgba(255,255,255,.10)}
-    .btn.primary{
-      background: rgba(34,197,94,.18);
-      border-color: rgba(34,197,94,.35);
-    }
-    .btn.danger{
-      background: rgba(239,68,68,.14);
-      border-color: rgba(239,68,68,.35);
-    }
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Super Bowl Squares</title>
 
-    .gridCard{
-      margin-top: 16px;
-      background: rgba(18,24,38,.72);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: var(--radius);
-      padding: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,.25);
-    }
+<style>
+:root{
+  --bg:#0b0f14;
+  --text:#e6eaf2;
+  --muted:#9ca3af;
+  --accent:#22c55e;
+  --danger:#ef4444;
+  --radius:14px;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  background: radial-gradient(1200px 600px at 20% 0%, #132033 0%, var(--bg) 55%) fixed;
+  color:var(--text);
+}
+.wrap{
+  max-width:1100px;
+  margin:22px auto;
+  padding:0 14px 28px;
+}
+header{
+  background: linear-gradient(180deg, rgba(34,197,94,.12), rgba(96,165,250,.08));
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  padding:14px 16px;
+}
+h1{margin:0;font-size:18px}
+.sub{font-size:13px;color:var(--muted)}
+.pillRow{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.pill{
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:12px;
+}
+.pill b{color:var(--accent)}
 
-    .boardHeader{
-      display:flex;
-      justify-content:space-between;
-      gap:12px;
-      flex-wrap:wrap;
-      align-items:center;
-      margin-bottom: 10px;
-    }
-    .teams{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    .teamInput{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      background: rgba(255,255,255,.05);
-      border:1px solid rgba(255,255,255,.08);
-      padding: 8px 10px;
-      border-radius: 12px;
-    }
-    .teamInput label{font-size:12px; color:var(--muted)}
-    .teamInput input{
-      width: 160px;
-      border:none;
-      outline:none;
-      background: transparent;
-      color: var(--text);
-      font-weight:700;
-      font-size: 13px;
-    }
+.btn{
+  cursor:pointer;
+  border-radius:10px;
+  padding:8px 12px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  font-weight:600;
+  font-size:12px;
+}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn.primary{border-color:rgba(34,197,94,.4)}
 
-    .board{
-      display:grid;
-      grid-template-columns: 48px repeat(10, minmax(0, 1fr));
-      gap: 6px;
-      border-top: 1px solid rgba(255,255,255,.06);
-      padding-top: 10px;
-    }
-    .hcell, .lcell, .cell{
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,.08);
-      min-height: 46px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding: 6px;
-      line-height:1.05;
-    }
-    .hcell, .lcell{
-      background: rgba(96,165,250,.10);
-      border-color: rgba(96,165,250,.22);
-      font-weight: 800;
-      color: #dbeafe;
-      user-select:none;
-    }
-    .corner{
-      background: rgba(34,197,94,.10);
-      border-color: rgba(34,197,94,.22);
-      color:#dcfce7;
-      font-size: 12px;
-      font-weight: 800;
-      user-select:none;
-    }
-    .cell{
-      background: rgba(15,23,42,.85);
-      cursor:pointer;
-      transition: transform .05s ease, background .12s ease, border-color .12s ease;
-      font-size: 12px;
-      font-weight: 700;
-      word-break: break-word;
-    }
-    .cell:hover{
-      background: rgba(22,33,58,.95);
-      border-color: rgba(255,255,255,.16);
-    }
-    .cell.taken{
-      background: rgba(17,24,39,.92);
-      border-color: rgba(255,255,255,.10);
-      cursor:not-allowed;
-      opacity:.92;
-    }
-    .cell .small{
-      display:block;
-      margin-top:4px;
-      font-size: 11px;
-      color: var(--muted);
-      font-weight:600;
-    }
+.gridCard{
+  margin-top:16px;
+  background:rgba(18,24,38,.72);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--radius);
+  padding:14px;
+}
 
-    .bottomRow{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
-    @media (max-width: 900px){
-      .board{
-        grid-template-columns: 42px repeat(10, minmax(0, 1fr));
-      }
-      .bottomRow{grid-template-columns: 1fr;}
-      .teamInput input{width: 140px;}
-    }
-    .panel{
-      background: rgba(255,255,255,.04);
-      border:1px solid rgba(255,255,255,.08);
-      border-radius: 14px;
-      padding: 12px;
-    }
-    .panel h2{
-      margin:0 0 10px 0;
-      font-size: 13px;
-      letter-spacing:.2px;
-      color: #e5e7eb;
-    }
-    table{
-      width:100%;
-      border-collapse:collapse;
-      font-size: 12px;
-    }
-    th, td{
-      border-bottom: 1px solid rgba(255,255,255,.06);
-      padding: 8px 6px;
-      text-align:left;
-      color: var(--text);
-    }
-    th{color: var(--muted); font-weight:700}
-    .note{
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 8px;
-      line-height:1.35;
-    }
+/* Board layout */
+.boardWrapper{
+  position:relative;
+  padding-left:60px;
+}
+.team1Label{
+  text-align:center;
+  font-weight:800;
+  margin-bottom:6px;
+}
+.team2Label{
+  position:absolute;
+  left:0;
+  top:50%;
+  transform:rotate(-90deg) translate(-50%,0);
+  transform-origin:left top;
+  font-weight:800;
+  white-space:nowrap;
+}
 
-    .modalBack{
-      position:fixed; inset:0;
-      background: rgba(0,0,0,.55);
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding: 16px;
-      z-index: 50;
-    }
-    .modal{
-      width: 100%;
-      max-width: 420px;
-      background: rgba(18,24,38,.98);
-      border:1px solid rgba(255,255,255,.10);
-      border-radius: 16px;
-      padding: 14px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.35);
-    }
-    .modal h3{margin:0 0 8px 0; font-size: 15px}
-    .modal .meta{color: var(--muted); font-size: 12px; margin-bottom: 10px}
-    .modal input{
-      width:100%;
-      padding: 10px 12px;
-      border-radius: 12px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      outline:none;
-      color: var(--text);
-      font-weight:700;
-    }
-    .modal .row{
-      display:flex;
-      justify-content:flex-end;
-      gap:10px;
-      margin-top: 10px;
-    }
-    .status{
-      margin-top: 10px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .status .ok{color: var(--accent)}
-    .status .bad{color: var(--danger)}
-  </style>
+.board{
+  display:grid;
+  grid-template-columns: repeat(10, 1fr);
+  gap:6px;
+}
+
+.cell{
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.08);
+  min-height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  font-size:12px;
+  font-weight:700;
+  background:rgba(15,23,42,.9);
+  cursor:pointer;
+}
+.cell:hover{background:rgba(30,41,59,.9)}
+.cell.taken{
+  cursor:not-allowed;
+  background:rgba(17,24,39,.95);
+  opacity:.9;
+}
+
+/* Modal */
+.modalBack{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:50;
+}
+.modal{
+  width:100%;
+  max-width:380px;
+  background:#0f172a;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:14px;
+  padding:16px;
+}
+.modal h3{margin:0 0 10px 0;font-size:15px}
+.modal input{
+  width:100%;
+  padding:10px 12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,.15);
+  background:rgba(255,255,255,.05);
+  color:var(--text);
+}
+.modal .row{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+  margin-top:10px;
+}
+.status{font-size:12px;margin-top:6px;color:var(--danger)}
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <header>
-      <div class="topRow">
-        <div>
-          <h1>Super Bowl Squares</h1>
-          <div class="sub">
-            TYPE YOUR NAME IN THE SQUARE(S) YOU WANT TO SELECT. <b>$10 / square</b>.
-            <span style="color:#cbd5e1">First come, first served.</span>
-          </div>
-          <div class="pillRow">
-            <div class="pill">Blank Squares: <b id="blankCount">100</b></div>
-            <div class="pill">Squares Selected: <b id="selectedCount">0</b></div>
-            <div class="pill">Total Pot: <b id="totalPot">$0</b></div>
-            <div class="pill">Mode: <b id="modeLabel">Local</b></div>
-          </div>
-        </div>
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <button class="btn primary" id="randomizeBtn" title="Randomize header numbers (admin)">Randomize 0–9</button>
-          <button class="btn" id="exportBtn" title="Download current board as JSON">Export</button>
-          <button class="btn" id="clearAccessBtn" title="Clear access code on this device">Clear Access</button>
-          <button class="btn danger" id="resetBtn" title="Clear board (admin)">Reset</button>
-        </div>
-      </div>
-      <div class="note">
-        Pool is protected with an access code. Users will be prompted the first time they try to claim a square.
-        (This version is still local-only unless you add a shared backend like Firebase.)
-      </div>
-    </header>
+<div class="wrap">
+<header>
+  <h1>Super Bowl Squares</h1>
+  <div class="sub">Click a square to claim it · $10 per square</div>
 
-    <div class="gridCard">
-      <div class="boardHeader">
-        <div class="teams">
-          <div class="teamInput">
-            <label>TEAM 1</label>
-            <input id="team1" value="TEAM 1" />
-          </div>
-          <div class="teamInput">
-            <label>TEAM 2</label>
-            <input id="team2" value="TEAM 2" />
-          </div>
-        </div>
-        <div class="sub" style="max-width:520px">
-          Headers are “protected”. Click any empty square to claim it.
-        </div>
-      </div>
-
-      <div class="board" id="board"></div>
-
-      <div class="bottomRow">
-        <div class="panel">
-          <h2>SCORE TRACKER</h2>
-          <table>
-            <thead>
-              <tr>
-                <th></th>
-                <th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><th id="team1Label">TEAM 1</th><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td></tr>
-              <tr><th id="team2Label">TEAM 2</th><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td></tr>
-              <tr><th>Winner</th><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td></tr>
-            </tbody>
-          </table>
-          <div class="note">This section is display-only in this free version (protected fields idea).</div>
-        </div>
-
-        <div class="panel">
-          <h2>PAYOUT</h2>
-          <table>
-            <thead>
-              <tr><th>Quarter</th><th>Payout</th></tr>
-            </thead>
-            <tbody id="payoutRows">
-              <tr><td>Q1</td><td>$0</td></tr>
-              <tr><td>Q2</td><td>$0</td></tr>
-              <tr><td>Q3</td><td>$0</td></tr>
-              <tr><td>Q4</td><td>$0</td></tr>
-            </tbody>
-          </table>
-          <div class="note">You can customize payouts later (or compute from total pot).</div>
-        </div>
-      </div>
-    </div>
+  <div class="pillRow">
+    <div class="pill">Blank Squares: <b id="blankCount">100</b></div>
+    <div class="pill">Selected: <b id="selectedCount">0</b></div>
+    <div class="pill">Total Pot: <b id="totalPot">$0</b></div>
   </div>
 
-  <div class="modalBack" id="modalBack">
-    <div class="modal">
-      <h3 id="modalTitle">Claim square</h3>
-      <div class="meta" id="modalMeta"></div>
-      <input id="nameInput" placeholder="Type your name…" maxlength="22" />
-      <div class="status" id="modalStatus"></div>
-      <div class="row">
-        <button class="btn" id="cancelBtn">Cancel</button>
-        <button class="btn primary" id="confirmBtn">Claim</button>
-      </div>
+  <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn primary" id="resetBtn">Reset Board (Admin)</button>
+  </div>
+</header>
+
+<div class="gridCard">
+  <div class="boardWrapper">
+    <div class="team1Label" id="team1Label">TEAM 1</div>
+    <div class="team2Label" id="team2Label">TEAM 2</div>
+    <div class="board" id="board"></div>
+  </div>
+</div>
+</div>
+
+<!-- Name Modal -->
+<div class="modalBack" id="nameModal">
+  <div class="modal">
+    <h3>Claim Square</h3>
+    <input id="nameInput" placeholder="Enter your name"/>
+    <div class="status" id="nameStatus"></div>
+    <div class="row">
+      <button class="btn" onclick="closeNameModal()">Cancel</button>
+      <button class="btn primary" onclick="confirmName()">Claim</button>
     </div>
   </div>
+</div>
 
-  <script>
-    /**********************
-     * CONFIG
-     **********************/
-    const PRICE_PER_SQUARE = 10;
+<!-- Access Modal -->
+<div class="modalBack" id="accessModal">
+  <div class="modal">
+    <h3>Enter Pool Access Code</h3>
+    <input id="accessInput" placeholder="Access code"/>
+    <div class="status" id="accessStatus"></div>
+    <div class="row">
+      <button class="btn primary" onclick="confirmAccess()">Unlock</button>
+    </div>
+  </div>
+</div>
 
-    // Pool access code (change this)
-    const POOL_ACCESS_CODE = "SB2026";
+<script>
+const PRICE_PER_SQUARE = 10;
+const POOL_ACCESS_CODE = "SB2026";
 
-    /**********************
-     * STATE
-     **********************/
-    const defaultState = () => ({
-      team1: "TEAM 1",
-      team2: "TEAM 2",
-      colNums: shuffle([...Array(10)].map((_,i)=>i)),
-      rowNums: shuffle([...Array(10)].map((_,i)=>i)),
-      squares: Array.from({length:10}, (_,r) =>
-        Array.from({length:10}, (_,c) => ({
-          name: "",
-          claimedAt: null
-        }))
-      )
-    });
+// Axis values hidden from UI (you can populate later)
+const rowNums = [...Array(10).keys()];
+const colNums = [...Array(10).keys()];
 
-    let state = loadLocal() ?? defaultState();
-    let selected = {r:null, c:null};
+let state = load() || {
+  team1:"TEAM 1",
+  team2:"TEAM 2",
+  squares:Array.from({length:100}, ()=>"")
+};
 
-    /**********************
-     * DOM
-     **********************/
-    const boardEl = document.getElementById("board");
-    const blankCountEl = document.getElementById("blankCount");
-    const selectedCountEl = document.getElementById("selectedCount");
-    const totalPotEl = document.getElementById("totalPot");
-    const modeLabelEl = document.getElementById("modeLabel");
+let selectedIndex = null;
 
-    const team1El = document.getElementById("team1");
-    const team2El = document.getElementById("team2");
-    const team1Label = document.getElementById("team1Label");
-    const team2Label = document.getElementById("team2Label");
+const boardEl = document.getElementById("board");
+const blankCountEl = document.getElementById("blankCount");
+const selectedCountEl = document.getElementById("selectedCount");
+const totalPotEl = document.getElementById("totalPot");
 
-    const modalBack = document.getElementById("modalBack");
-    const modalTitle = document.getElementById("modalTitle");
-    const modalMeta = document.getElementById("modalMeta");
-    const nameInput = document.getElementById("nameInput");
-    const modalStatus = document.getElementById("modalStatus");
-    const cancelBtn = document.getElementById("cancelBtn");
-    const confirmBtn = document.getElementById("confirmBtn");
+function render(){
+  boardEl.innerHTML = "";
+  state.squares.forEach((name,idx)=>{
+    const d = document.createElement("div");
+    d.className = "cell" + (name ? " taken":"");
+    d.textContent = name || "Tap to claim";
+    d.onclick = ()=>openClaim(idx);
+    boardEl.appendChild(d);
+  });
 
-    document.getElementById("randomizeBtn").addEventListener("click", () => {
-      if (!isAdmin()) return alert("Admin only. Add #admin to the URL to use admin actions.");
-      state.colNums = shuffle([...Array(10)].map((_,i)=>i));
-      state.rowNums = shuffle([...Array(10)].map((_,i)=>i));
-      persist();
-      render();
-    });
+  const taken = state.squares.filter(v=>v).length;
+  blankCountEl.textContent = 100 - taken;
+  selectedCountEl.textContent = taken;
+  totalPotEl.textContent = "$" + (taken * PRICE_PER_SQUARE);
+}
 
-    document.getElementById("resetBtn").addEventListener("click", () => {
-      if (!isAdmin()) return alert("Admin only. Add #admin to the URL to reset.");
-      if (!confirm("Reset the entire board?")) return;
-      state = defaultState();
-      persist();
-      render();
-    });
+function openClaim(idx){
+  if(state.squares[idx]) return;
+  if(!hasAccess()){
+    selectedIndex = idx;
+    openAccessModal();
+    return;
+  }
+  selectedIndex = idx;
+  openNameModal();
+}
 
-    document.getElementById("exportBtn").addEventListener("click", () => {
-      const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "superbowl-squares.json";
-      a.click();
-      URL.revokeObjectURL(a.href);
-    });
+/* Access Gate */
+function hasAccess(){
+  return localStorage.getItem("sb_access") === "1";
+}
+function openAccessModal(){
+  document.getElementById("accessModal").style.display="flex";
+}
+function confirmAccess(){
+  const val = document.getElementById("accessInput").value.trim();
+  if(val === POOL_ACCESS_CODE){
+    localStorage.setItem("sb_access","1");
+    closeAccessModal();
+    openNameModal();
+  } else {
+    document.getElementById("accessStatus").textContent = "Incorrect code.";
+  }
+}
+function closeAccessModal(){
+  document.getElementById("accessModal").style.display="none";
+  document.getElementById("accessInput").value="";
+  document.getElementById("accessStatus").textContent="";
+}
 
-    document.getElementById("clearAccessBtn").addEventListener("click", () => {
-      lockAccess();
-    });
+/* Name Modal */
+function openNameModal(){
+  document.getElementById("nameModal").style.display="flex";
+}
+function closeNameModal(){
+  document.getElementById("nameModal").style.display="none";
+  document.getElementById("nameInput").value="";
+  document.getElementById("nameStatus").textContent="";
+}
+function confirmName(){
+  const name = document.getElementById("nameInput").value.trim();
+  if(!name){
+    document.getElementById("nameStatus").textContent = "Name required.";
+    return;
+  }
+  state.squares[selectedIndex] = name;
+  save();
+  closeNameModal();
+  render();
+}
 
-    team1El.addEventListener("input", () => {
-      state.team1 = team1El.value.trim() || "TEAM 1";
-      persist(); renderLabels();
-    });
-    team2El.addEventListener("input", () => {
-      state.team2 = team2El.value.trim() || "TEAM 2";
-      persist(); renderLabels();
-    });
-
-    cancelBtn.addEventListener("click", closeModal);
-    modalBack.addEventListener("click", (e) => { if (e.target === modalBack) closeModal(); });
-
-    confirmBtn.addEventListener("click", () => {
-      const r = selected.r, c = selected.c;
-      if (r === null || c === null) return;
-
-      const raw = nameInput.value.trim();
-      if (!raw) {
-        modalStatus.innerHTML = '<span class="bad">Name is required.</span>';
-        return;
-      }
-
-      if (state.squares[r][c].name && !isAdmin()) {
-        modalStatus.innerHTML = '<span class="bad">That square is already taken.</span>';
-        return;
-      }
-
-      state.squares[r][c].name = raw;
-      state.squares[r][c].claimedAt = new Date().toISOString();
-
-      persist();
-      render();
-      closeModal();
-    });
-
-    /**********************
-     * ACCESS CODE GATE
-     **********************/
-    function hasAccess(){
-      return localStorage.getItem("sb_pool_access_ok") === "1";
-    }
-
-    function requireAccess(){
-      if (hasAccess()) return true;
-
-      const entered = prompt("Enter pool access code:");
-      if (entered && entered.trim() === POOL_ACCESS_CODE) {
-        localStorage.setItem("sb_pool_access_ok", "1");
-        return true;
-      }
-
-      alert("Incorrect code.");
-      return false;
-    }
-
-    function lockAccess(){
-      localStorage.removeItem("sb_pool_access_ok");
-      alert("Access cleared on this device.");
-    }
-
-    /**********************
-     * RENDER
-     **********************/
-    function render(){
-      renderLabels();
-      renderBoard();
-      renderCounts();
-      modeLabelEl.textContent = "Local";
-    }
-
-    function renderLabels(){
-      team1El.value = state.team1;
-      team2El.value = state.team2;
-      team1Label.textContent = state.team1;
-      team2Label.textContent = state.team2;
-    }
-
-    function renderBoard(){
-      boardEl.innerHTML = "";
-
-      boardEl.appendChild(div("hcell corner", "0–9"));
-
-      for (let c=0; c<10; c++){
-        boardEl.appendChild(div("hcell", String(state.colNums[c])));
-      }
-
-      for (let r=0; r<10; r++){
-        boardEl.appendChild(div("lcell", String(state.rowNums[r])));
-
-        for (let c=0; c<10; c++){
-          const sq = state.squares[r][c];
-          const cell = document.createElement("div");
-          cell.className = "cell" + (sq.name ? " taken" : "");
-          cell.innerHTML = sq.name
-            ? `${escapeHtml(sq.name)}<span class="small">Taken</span>`
-            : `Tap to claim<span class="small">Row ${state.rowNums[r]} / Col ${state.colNums[c]}</span>`;
-
-          cell.addEventListener("click", () => {
-            if (!requireAccess()) return;
-            if (sq.name && !isAdmin()) return;
-            openModal(r,c);
-          });
-
-          boardEl.appendChild(cell);
-        }
-      }
-    }
-
-    function renderCounts(){
-      const taken = countTaken();
-      const blank = 100 - taken;
-      blankCountEl.textContent = String(blank);
-      selectedCountEl.textContent = String(taken);
-      totalPotEl.textContent = `$${taken * PRICE_PER_SQUARE}`;
-    }
-
-    function countTaken(){
-      let t=0;
-      for (let r=0; r<10; r++){
-        for (let c=0; c<10; c++){
-          if (state.squares[r][c].name) t++;
-        }
-      }
-      return t;
-    }
-
-    /**********************
-     * MODAL
-     **********************/
-    function openModal(r,c){
-      selected = {r,c};
-      const takenName = state.squares[r][c].name;
-      modalTitle.textContent = takenName ? "Edit square (admin)" : "Claim square";
-      modalMeta.textContent = `Row ${state.rowNums[r]} • Col ${state.colNums[c]}`;
-      nameInput.value = takenName || "";
-      modalStatus.textContent = takenName && !isAdmin()
-        ? "This square is already taken."
-        : "";
-      modalBack.style.display = "flex";
-      setTimeout(()=>nameInput.focus(), 50);
-    }
-    function closeModal(){
-      modalBack.style.display = "none";
-      selected = {r:null, c:null};
-    }
-
-    /**********************
-     * STORAGE (Local)
-     **********************/
-    function loadLocal(){
-      try{
-        const raw = localStorage.getItem("sb_squares_state_v1");
-        return raw ? JSON.parse(raw) : null;
-      }catch(e){ return null; }
-    }
-    function saveLocal(){
-      localStorage.setItem("sb_squares_state_v1", JSON.stringify(state));
-    }
-
-    /**********************
-     * ADMIN GATE
-     **********************/
-    function isAdmin(){
-      return (location.hash || "").toLowerCase().includes("admin");
-    }
-
-    /**********************
-     * HELPERS
-     **********************/
-    function div(cls, text){
-      const d = document.createElement("div");
-      d.className = cls;
-      d.textContent = text;
-      return d;
-    }
-    function shuffle(arr){
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
-    function escapeHtml(s){
-      return s.replace(/[&<>"']/g, (m) => ({
-        "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-      }[m]));
-    }
-
-    function persist(){
-      saveLocal();
-    }
-
+/* Admin */
+document.getElementById("resetBtn").onclick = ()=>{
+  if(!location.hash.includes("admin")){
+    alert("Add #admin to the URL to reset.");
+    return;
+  }
+  if(confirm("Reset board?")){
+    state.squares = Array.from({length:100}, ()=>"");
+    save();
     render();
-  </script>
+  }
+};
+
+/* Storage */
+function save(){
+  localStorage.setItem("sb_state", JSON.stringify(state));
+}
+function load(){
+  try{ return JSON.parse(localStorage.getItem("sb_state")); }
+  catch{ return null; }
+}
+
+render();
+</script>
 </body>
 </html>
