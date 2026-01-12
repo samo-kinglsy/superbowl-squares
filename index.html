@@ -205,6 +205,11 @@
     th,td{border-bottom:1px solid rgba(255,255,255,.06); padding:8px 6px; text-align:left; color:var(--text); vertical-align:top;}
     th{color:var(--muted); font-weight:700;}
     .note{color:var(--muted); font-size:12px; margin-top:8px; line-height:1.35;}
+
+    /* moved block: score+payout now lives between header and grid */
+    .topPanels{
+      margin-top: 12px;
+    }
     .bottomRow{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;}
 
     @media (max-width: 900px){
@@ -301,43 +306,8 @@
       </div>
     </header>
 
-    <div class="gridCard">
-      <div class="boardArea">
-        <div class="team1Top">
-          <div class="teamInput">
-            <label>TEAM 1</label>
-            <input id="team1" value="TEAM 1" />
-          </div>
-        </div>
-
-        <div class="team2Side">
-          <div class="teamInput">
-            <label>TEAM 2</label>
-            <input id="team2" value="TEAM 2" />
-          </div>
-        </div>
-
-        <div class="boardScroll">
-          <div class="board" id="board"></div>
-        </div>
-      </div>
-
-      <div class="sectionTitle">PLAYERS</div>
-      <div class="panel" style="margin-top:10px;">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:48px;">#</th>
-              <th>NAME</th>
-              <th style="width:120px;"># OF SQUARES</th>
-              <th style="width:140px;">AMOUNT OWED</th>
-              <th style="width:140px;">AMOUNT PAID</th>
-            </tr>
-          </thead>
-          <tbody id="playersBody"></tbody>
-        </table>
-      </div>
-
+    <!-- ✅ MOVED: Score Tracker + Payout now live ABOVE the grid card -->
+    <div class="gridCard topPanels">
       <div class="bottomRow">
         <div class="panel">
           <h2>SCORE TRACKER</h2>
@@ -391,6 +361,45 @@
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- Original grid card content continues below -->
+    <div class="gridCard">
+      <div class="boardArea">
+        <div class="team1Top">
+          <div class="teamInput">
+            <label>TEAM 1</label>
+            <input id="team1" value="TEAM 1" />
+          </div>
+        </div>
+
+        <div class="team2Side">
+          <div class="teamInput">
+            <label>TEAM 2</label>
+            <input id="team2" value="TEAM 2" />
+          </div>
+        </div>
+
+        <div class="boardScroll">
+          <div class="board" id="board"></div>
+        </div>
+      </div>
+
+      <div class="sectionTitle">PLAYERS</div>
+      <div class="panel" style="margin-top:10px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:48px;">#</th>
+              <th>NAME</th>
+              <th style="width:120px;"># OF SQUARES</th>
+              <th style="width:140px;">AMOUNT OWED</th>
+              <th style="width:140px;">AMOUNT PAID</th>
+            </tr>
+          </thead>
+          <tbody id="playersBody"></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -674,12 +683,10 @@
       renderAdminBadge();
     });
 
-    // ✅ NEW: Lock Board button (password each time)
     lockBoardBtn.addEventListener("click", () => {
       if (!promptAdminPassword()) return alert("Incorrect admin password.");
 
       // When you lock/unlock the board, we also grant adminUnlocked to this device
-      // so you can still edit while everyone else is blocked.
       adminUnlocked = true;
 
       state.locked = !state.locked;
@@ -688,10 +695,8 @@
     });
 
     document.getElementById("randomizeBtn").addEventListener("click", () => {
-      // Password required EVERY time
       if (!promptAdminPassword()) return alert("Incorrect admin password.");
 
-      // Ensure unique 0-9 per axis
       state.colNums = shuffle([...Array(10)].map((_,i)=>i));
       state.rowNums = shuffle([...Array(10)].map((_,i)=>i));
       persistToFirebase(state);
@@ -699,7 +704,6 @@
     });
 
     document.getElementById("clearHeadersBtn").addEventListener("click", () => {
-      // Password required EVERY time
       if (!promptAdminPassword()) return alert("Incorrect admin password.");
 
       state.colNums = Array(10).fill("");
@@ -736,7 +740,6 @@
      * TEAM NAMES
      **********************/
     team1El.addEventListener("input", () => {
-      // optional: you could lock these too, but leaving as-is for now
       state.team1 = team1El.value.trim() || "TEAM 1";
       persistToFirebase(state); renderLabels();
     });
@@ -755,7 +758,6 @@
       const r = selected.r, c = selected.c;
       if (r === null || c === null) return;
 
-      // If board is locked and you're not admin-unlocked, block save
       if (state.locked && !adminUnlocked) {
         modalStatus.innerHTML = '<span class="bad">Board is locked.</span>';
         return;
@@ -781,7 +783,6 @@
     });
 
     function openModal(r,c){
-      // If board is locked and you're not admin-unlocked, block edit
       if (state.locked && !adminUnlocked) {
         alert("Board is locked.");
         return;
@@ -843,7 +844,6 @@
           const cell = document.createElement("div");
           const hasName = ((sq.name || "").trim().length > 0);
 
-          // Add a visual locked state (for non-admin) when board is locked
           const lockedClass = (state.locked && !adminUnlocked) ? " locked" : "";
           cell.className = "cell" + (hasName ? " taken" : "") + lockedClass;
           cell.innerHTML = hasName ? escapeHtml(sq.name) : "Tap to claim";
@@ -1095,14 +1095,12 @@
      * Apply admin locks to editables
      **********************/
     function applyAdminLocks(){
-      // Score tracker cells
       for (const [, , id] of scoreCells){
         const el = document.getElementById(id);
         if (!el) continue;
         el.contentEditable = adminUnlocked ? "true" : "false";
       }
 
-      // Payout cells
       for (const q of ["q1","q2","q3","q4"]){
         const nameCell = document.querySelector(`[data-pname="${q}"]`);
         const payCell  = document.querySelector(`[data-ppay="${q}"]`);
@@ -1110,7 +1108,6 @@
         if (payCell)  payCell.contentEditable  = adminUnlocked ? "true" : "false";
       }
 
-      // Amount Paid cells in Players table
       const paidCells = playersBody.querySelectorAll('td[data-pkey]');
       paidCells.forEach(td => {
         td.contentEditable = (adminUnlocked && td.dataset.pkey) ? "true" : "false";
@@ -1146,7 +1143,6 @@
     bindScoreTracker();
     bindPayout();
 
-    // If already unlocked on this device, connect immediately; otherwise show access modal.
     if (!hasAccess()) {
       showAccess();
     } else {
