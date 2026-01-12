@@ -88,10 +88,6 @@
       background: rgba(34,197,94,.18);
       border-color: rgba(34,197,94,.35);
     }
-    .btn.danger{
-      background: rgba(239,68,68,.14);
-      border-color: rgba(239,68,68,.35);
-    }
 
     .gridCard{
       margin-top: 16px;
@@ -102,6 +98,7 @@
       box-shadow: 0 10px 30px rgba(0,0,0,.25);
     }
 
+    /* Board layout + team labels */
     .boardHeader{
       display:flex;
       justify-content:space-between;
@@ -110,12 +107,7 @@
       align-items:center;
       margin-bottom: 10px;
     }
-    .teams{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+
     .teamInput{
       display:flex;
       align-items:center;
@@ -124,6 +116,7 @@
       border:1px solid rgba(255,255,255,.08);
       padding: 8px 10px;
       border-radius: 12px;
+      user-select:none;
     }
     .teamInput label{font-size:12px; color:var(--muted)}
     .teamInput input{
@@ -136,6 +129,37 @@
       font-size: 13px;
     }
 
+    .boardArea{
+      position: relative;
+      padding-top: 54px;      /* space for Team 1 centered label */
+      padding-left: 60px;     /* space for Team 2 vertical label */
+    }
+    .team1Top{
+      position:absolute;
+      top: 0;
+      left: 60px;             /* align over grid (after y-axis space) */
+      right: 0;
+      display:flex;
+      justify-content:center;
+      pointer-events:auto;
+    }
+    .team2Side{
+      position:absolute;
+      top: 54px;              /* align with grid start (after top padding) */
+      left: 0;
+      bottom: 0;
+      width: 60px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:auto;
+    }
+    .team2Side .teamInput{
+      transform: rotate(-90deg);
+      transform-origin: center;
+    }
+
+    /* Board */
     .board{
       display:grid;
       grid-template-columns: 48px repeat(10, minmax(0, 1fr));
@@ -172,7 +196,7 @@
     .cell{
       background: rgba(15,23,42,.85);
       cursor:pointer;
-      transition: transform .05s ease, background .12s ease, border-color .12s ease;
+      transition: background .12s ease, border-color .12s ease;
       font-size: 12px;
       font-weight: 700;
       word-break: break-word;
@@ -184,8 +208,8 @@
     .cell.taken{
       background: rgba(17,24,39,.92);
       border-color: rgba(255,255,255,.10);
-      cursor:not-allowed;
-      opacity:.92;
+      opacity:.95;
+      cursor:pointer; /* allow editing / clearing */
     }
     .cell .small{
       display:block;
@@ -195,30 +219,20 @@
       font-weight:600;
     }
 
-    .bottomRow{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
+    /* Players + Score/Payout */
+    .sectionTitle{
+      margin-top: 14px;
+      font-size: 13px;
+      letter-spacing:.2px;
+      color: #e5e7eb;
+      font-weight: 800;
     }
-    @media (max-width: 900px){
-      .board{
-        grid-template-columns: 42px repeat(10, minmax(0, 1fr));
-      }
-      .bottomRow{grid-template-columns: 1fr;}
-      .teamInput input{width: 140px;}
-    }
+
     .panel{
       background: rgba(255,255,255,.04);
       border:1px solid rgba(255,255,255,.08);
       border-radius: 14px;
       padding: 12px;
-    }
-    .panel h2{
-      margin:0 0 10px 0;
-      font-size: 13px;
-      letter-spacing:.2px;
-      color: #e5e7eb;
     }
     table{
       width:100%;
@@ -230,6 +244,7 @@
       padding: 8px 6px;
       text-align:left;
       color: var(--text);
+      vertical-align: top;
     }
     th{color: var(--muted); font-weight:700}
     .note{
@@ -239,6 +254,25 @@
       line-height:1.35;
     }
 
+    .bottomRow{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    @media (max-width: 900px){
+      .board{
+        grid-template-columns: 42px repeat(10, minmax(0, 1fr));
+      }
+      .bottomRow{grid-template-columns: 1fr;}
+      .teamInput input{width: 140px;}
+      .boardArea{padding-left: 54px;}
+      .team1Top{left: 54px;}
+      .team2Side{width: 54px;}
+    }
+
+    /* Modal */
     .modalBack{
       position:fixed; inset:0;
       background: rgba(0,0,0,.55);
@@ -282,6 +316,16 @@
     }
     .status .ok{color: var(--accent)}
     .status .bad{color: var(--danger)}
+
+    /* Editable cells */
+    td[contenteditable="true"]{
+      outline: none;
+      border-radius: 8px;
+    }
+    td[contenteditable="true"]:focus{
+      box-shadow: 0 0 0 2px rgba(96,165,250,.35);
+      background: rgba(255,255,255,.04);
+    }
   </style>
 </head>
 
@@ -302,37 +346,64 @@
             <div class="pill">Mode: <b id="modeLabel">Local</b></div>
           </div>
         </div>
+
+        <!-- Only keep Randomize + Export per your instructions -->
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <button class="btn primary" id="randomizeBtn" title="Randomize header numbers (admin)">Randomize 0–9</button>
           <button class="btn" id="exportBtn" title="Download current board as JSON">Export</button>
-          <button class="btn" id="clearAccessBtn" title="Clear access code on this device">Clear Access</button>
-          <button class="btn danger" id="resetBtn" title="Clear board (admin)">Reset</button>
         </div>
       </div>
+
       <div class="note">
-        Pool is protected with an access code. Users will be prompted the first time they try to claim a square.
-        (This version is still local-only unless you add a shared backend like Firebase.)
+        Access code required on page load. (This version is still local-only unless you add a shared backend like Firebase.)
       </div>
     </header>
 
     <div class="gridCard">
       <div class="boardHeader">
-        <div class="teams">
+        <div class="sub" style="max-width:720px">
+          Headers are “protected”. Click any square to enter your name (or clear it by deleting all text).
+        </div>
+      </div>
+
+      <!-- Board + centered Team labels -->
+      <div class="boardArea">
+        <div class="team1Top">
           <div class="teamInput">
             <label>TEAM 1</label>
             <input id="team1" value="TEAM 1" />
           </div>
+        </div>
+
+        <div class="team2Side">
           <div class="teamInput">
             <label>TEAM 2</label>
             <input id="team2" value="TEAM 2" />
           </div>
         </div>
-        <div class="sub" style="max-width:520px">
-          Headers are “protected”. Click any empty square to claim it.
-        </div>
+
+        <div class="board" id="board"></div>
       </div>
 
-      <div class="board" id="board"></div>
+      <!-- Players -->
+      <div class="sectionTitle">PLAYERS</div>
+      <div class="panel" style="margin-top:10px;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:48px;">#</th>
+              <th>NAME</th>
+              <th style="width:120px;"># OF SQUARES</th>
+              <th style="width:140px;">AMOUNT OWED</th>
+              <th style="width:140px;">AMOUNT PAID</th>
+            </tr>
+          </thead>
+          <tbody id="playersBody">
+            <!-- 30 rows injected by JS -->
+          </tbody>
+        </table>
+        <div class="note">“Amount Paid” is editable. Everything else updates automatically from the squares.</div>
+      </div>
 
       <div class="bottomRow">
         <div class="panel">
@@ -345,42 +416,77 @@
               </tr>
             </thead>
             <tbody>
-              <tr><th id="team1Label">TEAM 1</th><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td></tr>
-              <tr><th id="team2Label">TEAM 2</th><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td></tr>
-              <tr><th>Winner</th><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td><td contenteditable="false">—</td></tr>
+              <tr>
+                <th id="team1Label">TEAM 1</th>
+                <td id="t1q1" contenteditable="true"></td>
+                <td id="t1q2" contenteditable="true"></td>
+                <td id="t1q3" contenteditable="true"></td>
+                <td id="t1q4" contenteditable="true"></td>
+              </tr>
+              <tr>
+                <th id="team2Label">TEAM 2</th>
+                <td id="t2q1" contenteditable="true"></td>
+                <td id="t2q2" contenteditable="true"></td>
+                <td id="t2q3" contenteditable="true"></td>
+                <td id="t2q4" contenteditable="true"></td>
+              </tr>
+              <tr>
+                <th>Winner</th>
+                <td id="wq1">—</td>
+                <td id="wq2">—</td>
+                <td id="wq3">—</td>
+                <td id="wq4">—</td>
+              </tr>
             </tbody>
           </table>
-          <div class="note">This section is display-only in this free version (protected fields idea).</div>
+          <div class="note">
+            Enter the last digit of each team’s score for each quarter. Winner will auto-populate based on the matching square.
+          </div>
         </div>
 
         <div class="panel">
           <h2>PAYOUT</h2>
           <table>
             <thead>
-              <tr><th>Quarter</th><th>Payout</th></tr>
+              <tr><th>Quarter</th><th>Name</th><th>Payout</th></tr>
             </thead>
             <tbody id="payoutRows">
-              <tr><td>Q1</td><td>$0</td></tr>
-              <tr><td>Q2</td><td>$0</td></tr>
-              <tr><td>Q3</td><td>$0</td></tr>
-              <tr><td>Q4</td><td>$0</td></tr>
+              <tr><td>Q1</td><td contenteditable="true" data-pname="q1"></td><td contenteditable="true" data-ppay="q1"></td></tr>
+              <tr><td>Q2</td><td contenteditable="true" data-pname="q2"></td><td contenteditable="true" data-ppay="q2"></td></tr>
+              <tr><td>Q3</td><td contenteditable="true" data-pname="q3"></td><td contenteditable="true" data-ppay="q3"></td></tr>
+              <tr><td>Q4</td><td contenteditable="true" data-pname="q4"></td><td contenteditable="true" data-ppay="q4"></td></tr>
             </tbody>
           </table>
-          <div class="note">You can customize payouts later (or compute from total pot).</div>
+          <div class="note">Name and Payout are editable.</div>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Claim modal -->
   <div class="modalBack" id="modalBack">
     <div class="modal">
-      <h3 id="modalTitle">Claim square</h3>
+      <h3 id="modalTitle">Edit square</h3>
       <div class="meta" id="modalMeta"></div>
       <input id="nameInput" placeholder="Type your name…" maxlength="22" />
       <div class="status" id="modalStatus"></div>
       <div class="row">
         <button class="btn" id="cancelBtn">Cancel</button>
-        <button class="btn primary" id="confirmBtn">Claim</button>
+        <button class="btn primary" id="confirmBtn">Save</button>
+      </div>
+      <div class="note">To release a square, delete all text and click Save.</div>
+    </div>
+  </div>
+
+  <!-- Access code modal shown on page load -->
+  <div class="modalBack" id="accessBack">
+    <div class="modal">
+      <h3>Enter Access Code</h3>
+      <div class="meta">This pool is protected. Enter the code to continue.</div>
+      <input id="accessInput" placeholder="Access code" />
+      <div class="status" id="accessStatus"></div>
+      <div class="row">
+        <button class="btn primary" id="accessBtn">Enter</button>
       </div>
     </div>
   </div>
@@ -391,8 +497,8 @@
      **********************/
     const PRICE_PER_SQUARE = 10;
 
-    // Pool access code (change this)
-    const POOL_ACCESS_CODE = "SB2026";
+    // Pool access code (fixed per your instructions)
+    const POOL_ACCESS_CODE = "REDZONE2026";
 
     /**********************
      * STATE
@@ -400,14 +506,30 @@
     const defaultState = () => ({
       team1: "TEAM 1",
       team2: "TEAM 2",
+      // Keep these in code for later winner calculation.
+      // You can manually set these arrays later in code.
       colNums: shuffle([...Array(10)].map((_,i)=>i)),
       rowNums: shuffle([...Array(10)].map((_,i)=>i)),
-      squares: Array.from({length:10}, (_,r) =>
-        Array.from({length:10}, (_,c) => ({
+      squares: Array.from({length:10}, () =>
+        Array.from({length:10}, () => ({
           name: "",
           claimedAt: null
         }))
-      )
+      ),
+      // Track "Amount Paid" per player (editable)
+      amountPaid: {}, // { "john": "20" } stored as text
+      // Payout editable fields
+      payout: {
+        q1: { name: "", payout: "" },
+        q2: { name: "", payout: "" },
+        q3: { name: "", payout: "" },
+        q4: { name: "", payout: "" }
+      },
+      // Score tracker digits (editable)
+      scores: {
+        t1: { q1:"", q2:"", q3:"", q4:"" },
+        t2: { q1:"", q2:"", q3:"", q4:"" }
+      }
     });
 
     let state = loadLocal() ?? defaultState();
@@ -428,25 +550,58 @@
     const team2Label = document.getElementById("team2Label");
 
     const modalBack = document.getElementById("modalBack");
-    const modalTitle = document.getElementById("modalTitle");
     const modalMeta = document.getElementById("modalMeta");
     const nameInput = document.getElementById("nameInput");
     const modalStatus = document.getElementById("modalStatus");
     const cancelBtn = document.getElementById("cancelBtn");
     const confirmBtn = document.getElementById("confirmBtn");
 
+    const playersBody = document.getElementById("playersBody");
+
+    // Access modal
+    const accessBack = document.getElementById("accessBack");
+    const accessInput = document.getElementById("accessInput");
+    const accessStatus = document.getElementById("accessStatus");
+    const accessBtn = document.getElementById("accessBtn");
+
+    /**********************
+     * ACCESS CODE (once on page load)
+     **********************/
+    function hasAccess(){
+      return localStorage.getItem("sb_pool_access_ok") === "1";
+    }
+    function setAccess(){
+      localStorage.setItem("sb_pool_access_ok", "1");
+    }
+    function showAccess(){
+      accessBack.style.display = "flex";
+      setTimeout(()=>accessInput.focus(), 50);
+    }
+    function hideAccess(){
+      accessBack.style.display = "none";
+      accessInput.value = "";
+      accessStatus.textContent = "";
+    }
+    function validateAccess(){
+      const entered = (accessInput.value || "").trim();
+      if (entered === POOL_ACCESS_CODE) {
+        setAccess();
+        hideAccess();
+        // page now usable
+      } else {
+        accessStatus.innerHTML = '<span class="bad">Incorrect code.</span>';
+      }
+    }
+    accessBtn.addEventListener("click", validateAccess);
+    accessInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter") validateAccess(); });
+
+    /**********************
+     * HEADER BUTTONS
+     **********************/
     document.getElementById("randomizeBtn").addEventListener("click", () => {
       if (!isAdmin()) return alert("Admin only. Add #admin to the URL to use admin actions.");
       state.colNums = shuffle([...Array(10)].map((_,i)=>i));
       state.rowNums = shuffle([...Array(10)].map((_,i)=>i));
-      persist();
-      render();
-    });
-
-    document.getElementById("resetBtn").addEventListener("click", () => {
-      if (!isAdmin()) return alert("Admin only. Add #admin to the URL to reset.");
-      if (!confirm("Reset the entire board?")) return;
-      state = defaultState();
       persist();
       render();
     });
@@ -460,10 +615,9 @@
       URL.revokeObjectURL(a.href);
     });
 
-    document.getElementById("clearAccessBtn").addEventListener("click", () => {
-      lockAccess();
-    });
-
+    /**********************
+     * TEAM NAMES
+     **********************/
     team1El.addEventListener("input", () => {
       state.team1 = team1El.value.trim() || "TEAM 1";
       persist(); renderLabels();
@@ -473,6 +627,9 @@
       persist(); renderLabels();
     });
 
+    /**********************
+     * CLAIM MODAL
+     **********************/
     cancelBtn.addEventListener("click", closeModal);
     modalBack.addEventListener("click", (e) => { if (e.target === modalBack) closeModal(); });
 
@@ -480,48 +637,41 @@
       const r = selected.r, c = selected.c;
       if (r === null || c === null) return;
 
-      const raw = nameInput.value.trim();
-      if (!raw) {
-        modalStatus.innerHTML = '<span class="bad">Name is required.</span>';
-        return;
-      }
+      const raw = (nameInput.value || "").trim();
 
-      if (state.squares[r][c].name && !isAdmin()) {
-        modalStatus.innerHTML = '<span class="bad">That square is already taken.</span>';
+      // If empty => clear square (release it)
+      if (!raw) {
+        state.squares[r][c].name = "";
+        state.squares[r][c].claimedAt = null;
+        persist();
+        render();
+        closeModal();
         return;
       }
 
       state.squares[r][c].name = raw;
       state.squares[r][c].claimedAt = new Date().toISOString();
-
       persist();
       render();
       closeModal();
     });
 
-    /**********************
-     * ACCESS CODE GATE
-     **********************/
-    function hasAccess(){
-      return localStorage.getItem("sb_pool_access_ok") === "1";
+    function openModal(r,c){
+      selected = {r,c};
+      const current = state.squares[r][c].name || "";
+      nameInput.value = current;
+      modalStatus.textContent = "";
+      // Keep meta subtle; you can remove if you want
+      modalMeta.textContent = "";
+      modalBack.style.display = "flex";
+      setTimeout(()=>nameInput.focus(), 50);
     }
-
-    function requireAccess(){
-      if (hasAccess()) return true;
-
-      const entered = prompt("Enter pool access code:");
-      if (entered && entered.trim() === POOL_ACCESS_CODE) {
-        localStorage.setItem("sb_pool_access_ok", "1");
-        return true;
-      }
-
-      alert("Incorrect code.");
-      return false;
-    }
-
-    function lockAccess(){
-      localStorage.removeItem("sb_pool_access_ok");
-      alert("Access cleared on this device.");
+    function closeModal(){
+      modalBack.style.display = "none";
+      selected = {r:null, c:null};
+      nameInput.value = "";
+      modalStatus.textContent = "";
+      modalMeta.textContent = "";
     }
 
     /**********************
@@ -531,6 +681,10 @@
       renderLabels();
       renderBoard();
       renderCounts();
+      renderPlayers();
+      renderScoreTrackerFromState();
+      renderWinners();
+      renderPayoutFromState();
       modeLabelEl.textContent = "Local";
     }
 
@@ -544,26 +698,31 @@
     function renderBoard(){
       boardEl.innerHTML = "";
 
-      boardEl.appendChild(div("hcell corner", "0–9"));
+      // Corner cell (blank)
+      boardEl.appendChild(div("hcell corner", ""));
 
+      // Top header cells (blank per your request)
       for (let c=0; c<10; c++){
-        boardEl.appendChild(div("hcell", String(state.colNums[c])));
+        boardEl.appendChild(div("hcell", ""));
       }
 
       for (let r=0; r<10; r++){
-        boardEl.appendChild(div("lcell", String(state.rowNums[r])));
+        // Left header cells (blank per your request)
+        boardEl.appendChild(div("lcell", ""));
 
         for (let c=0; c<10; c++){
           const sq = state.squares[r][c];
           const cell = document.createElement("div");
           cell.className = "cell" + (sq.name ? " taken" : "");
           cell.innerHTML = sq.name
-            ? `${escapeHtml(sq.name)}<span class="small">Taken</span>`
-            : `Tap to claim<span class="small">Row ${state.rowNums[r]} / Col ${state.colNums[c]}</span>`;
+            ? `${escapeHtml(sq.name)}`
+            : `Tap to claim`;
 
           cell.addEventListener("click", () => {
-            if (!requireAccess()) return;
-            if (sq.name && !isAdmin()) return;
+            if (!hasAccess()) {
+              showAccess();
+              return;
+            }
             openModal(r,c);
           });
 
@@ -584,30 +743,187 @@
       let t=0;
       for (let r=0; r<10; r++){
         for (let c=0; c<10; c++){
-          if (state.squares[r][c].name) t++;
+          if ((state.squares[r][c].name || "").trim()) t++;
         }
       }
       return t;
     }
 
     /**********************
-     * MODAL
+     * PLAYERS TABLE
      **********************/
-    function openModal(r,c){
-      selected = {r,c};
-      const takenName = state.squares[r][c].name;
-      modalTitle.textContent = takenName ? "Edit square (admin)" : "Claim square";
-      modalMeta.textContent = `Row ${state.rowNums[r]} • Col ${state.colNums[c]}`;
-      nameInput.value = takenName || "";
-      modalStatus.textContent = takenName && !isAdmin()
-        ? "This square is already taken."
-        : "";
-      modalBack.style.display = "flex";
-      setTimeout(()=>nameInput.focus(), 50);
+    function normalizeName(name){
+      return (name || "").trim();
     }
-    function closeModal(){
-      modalBack.style.display = "none";
-      selected = {r:null, c:null};
+    function keyName(name){
+      return normalizeName(name).toLowerCase();
+    }
+
+    function computePlayers(){
+      const map = new Map(); // key -> {displayName, count}
+      for (let r=0; r<10; r++){
+        for (let c=0; c<10; c++){
+          const nm = normalizeName(state.squares[r][c].name);
+          if (!nm) continue;
+          const k = keyName(nm);
+          if (!map.has(k)) map.set(k, { displayName: nm, count: 0 });
+          map.get(k).count += 1;
+        }
+      }
+      // Convert to array sorted by displayName
+      const arr = Array.from(map.entries()).map(([k,v])=>({ key:k, name:v.displayName, count:v.count }));
+      arr.sort((a,b)=>a.name.localeCompare(b.name));
+      return arr;
+    }
+
+    function renderPlayers(){
+      const players = computePlayers();
+      playersBody.innerHTML = "";
+
+      for (let i=0; i<30; i++){
+        const p = players[i] || null;
+        const tr = document.createElement("tr");
+
+        const tdIdx = document.createElement("td");
+        tdIdx.textContent = String(i+1);
+        tdIdx.style.color = "rgba(255,255,255,.7)";
+        tr.appendChild(tdIdx);
+
+        const tdName = document.createElement("td");
+        tdName.textContent = p ? p.name : "";
+        tr.appendChild(tdName);
+
+        const tdCount = document.createElement("td");
+        tdCount.textContent = p ? String(p.count) : "";
+        tr.appendChild(tdCount);
+
+        const tdOwed = document.createElement("td");
+        tdOwed.textContent = p ? formatMoney(p.count * PRICE_PER_SQUARE) : "";
+        tr.appendChild(tdOwed);
+
+        const tdPaid = document.createElement("td");
+        tdPaid.setAttribute("contenteditable", "true");
+        tdPaid.setAttribute("spellcheck", "false");
+        tdPaid.dataset.pkey = p ? p.key : "";
+        tdPaid.textContent = p ? (state.amountPaid[p.key] ?? "") : "";
+        tdPaid.addEventListener("blur", () => {
+          const key = tdPaid.dataset.pkey;
+          if (!key) return;
+          state.amountPaid[key] = (tdPaid.textContent || "").trim();
+          persist();
+        });
+        tr.appendChild(tdPaid);
+
+        playersBody.appendChild(tr);
+      }
+    }
+
+    function formatMoney(n){
+      const num = Number(n);
+      if (!isFinite(num)) return "";
+      return `$${num.toFixed(0)}`;
+    }
+
+    /**********************
+     * SCORE TRACKER (editable)
+     **********************/
+    const scoreCells = [
+      ["t1","q1","t1q1"],["t1","q2","t1q2"],["t1","q3","t1q3"],["t1","q4","t1q4"],
+      ["t2","q1","t2q1"],["t2","q2","t2q2"],["t2","q3","t2q3"],["t2","q4","t2q4"],
+    ];
+
+    function bindScoreTracker(){
+      for (const [team, q, id] of scoreCells){
+        const el = document.getElementById(id);
+        // Load existing
+        el.textContent = state.scores[team][q] || "";
+        el.addEventListener("input", () => {
+          // Keep only last digit 0-9 (or blank)
+          const txt = (el.textContent || "").trim();
+          const digit = txt === "" ? "" : txt.replace(/[^0-9]/g, "").slice(-1);
+          if (digit !== txt) el.textContent = digit;
+          state.scores[team][q] = digit;
+          persist();
+          renderWinners();
+        });
+      }
+    }
+
+    function renderScoreTrackerFromState(){
+      for (const [team, q, id] of scoreCells){
+        const el = document.getElementById(id);
+        el.textContent = state.scores[team][q] || "";
+      }
+    }
+
+    /**********************
+     * WINNER CALCULATION
+     **********************/
+    function renderWinners(){
+      // For each quarter: find intersection based on last digit
+      const qs = ["q1","q2","q3","q4"];
+      for (const q of qs){
+        const t1d = state.scores.t1[q];
+        const t2d = state.scores.t2[q];
+        const winnerEl = document.getElementById("w" + q);
+
+        if (!isDigit(t1d) || !isDigit(t2d)) {
+          winnerEl.textContent = "—";
+          continue;
+        }
+
+        const colIndex = indexOfDigit(state.colNums, Number(t1d));
+        const rowIndex = indexOfDigit(state.rowNums, Number(t2d));
+
+        if (colIndex === -1 || rowIndex === -1){
+          winnerEl.textContent = "—";
+          continue;
+        }
+
+        const nm = normalizeName(state.squares[rowIndex][colIndex].name);
+        winnerEl.textContent = nm ? nm : "—";
+      }
+    }
+
+    function isDigit(x){
+      return typeof x === "string" && x.length === 1 && x >= "0" && x <= "9";
+    }
+    function indexOfDigit(arr, d){
+      for (let i=0; i<arr.length; i++){
+        if (arr[i] === d) return i;
+      }
+      return -1;
+    }
+
+    /**********************
+     * PAYOUT (editable)
+     **********************/
+    function bindPayout(){
+      // Load existing
+      for (const q of ["q1","q2","q3","q4"]){
+        const nameCell = document.querySelector(`[data-pname="${q}"]`);
+        const payCell  = document.querySelector(`[data-ppay="${q}"]`);
+        nameCell.textContent = state.payout[q].name || "";
+        payCell.textContent  = state.payout[q].payout || "";
+
+        nameCell.addEventListener("blur", () => {
+          state.payout[q].name = (nameCell.textContent || "").trim();
+          persist();
+        });
+        payCell.addEventListener("blur", () => {
+          state.payout[q].payout = (payCell.textContent || "").trim();
+          persist();
+        });
+      }
+    }
+
+    function renderPayoutFromState(){
+      for (const q of ["q1","q2","q3","q4"]){
+        const nameCell = document.querySelector(`[data-pname="${q}"]`);
+        const payCell  = document.querySelector(`[data-ppay="${q}"]`);
+        if (nameCell) nameCell.textContent = state.payout[q].name || "";
+        if (payCell)  payCell.textContent  = state.payout[q].payout || "";
+      }
     }
 
     /**********************
@@ -621,6 +937,9 @@
     }
     function saveLocal(){
       localStorage.setItem("sb_squares_state_v1", JSON.stringify(state));
+    }
+    function persist(){
+      saveLocal();
     }
 
     /**********************
@@ -652,10 +971,17 @@
       }[m]));
     }
 
-    function persist(){
-      saveLocal();
-    }
+    /**********************
+     * INIT
+     **********************/
+    // If no access yet, show access modal immediately
+    if (!hasAccess()) showAccess();
 
+    // Bind editable tables once
+    bindScoreTracker();
+    bindPayout();
+
+    // First render
     render();
   </script>
 </body>
