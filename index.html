@@ -205,18 +205,14 @@
       background: rgba(22,33,58,.95);
       border-color: rgba(255,255,255,.16);
     }
+
+    /* ✅ Highlight claimed squares (fits palette) */
     .cell.taken{
-      background: rgba(17,24,39,.92);
-      border-color: rgba(255,255,255,.10);
-      opacity:.95;
-      cursor:pointer; /* allow editing / clearing */
-    }
-    .cell .small{
-      display:block;
-      margin-top:4px;
-      font-size: 11px;
-      color: var(--muted);
-      font-weight:600;
+      background: rgba(34,197,94,.18);         /* soft green */
+      border-color: rgba(34,197,94,.35);
+      box-shadow: 0 0 0 1px rgba(34,197,94,.10) inset;
+      opacity: 1;
+      cursor:pointer; /* allow editing/clearing */
     }
 
     /* Players + Score/Payout */
@@ -343,11 +339,10 @@
             <div class="pill">Blank Squares: <b id="blankCount">100</b></div>
             <div class="pill">Squares Selected: <b id="selectedCount">0</b></div>
             <div class="pill">Total Pot: <b id="totalPot">$0</b></div>
-            <div class="pill">Mode: <b id="modeLabel">Local</b></div>
+            <div class="pill">Mode: <b id="modeLabel">Shared (Firebase)</b></div>
           </div>
         </div>
 
-        <!-- Only keep Randomize + Export per your instructions -->
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <button class="btn primary" id="randomizeBtn" title="Randomize header numbers (admin)">Randomize 0–9</button>
           <button class="btn" id="exportBtn" title="Download current board as JSON">Export</button>
@@ -355,7 +350,7 @@
       </div>
 
       <div class="note">
-        Access code required on page load. (This version is still local-only unless you add a shared backend like Firebase.)
+        Access code required on page load. Live shared board via Firebase.
       </div>
     </header>
 
@@ -366,7 +361,6 @@
         </div>
       </div>
 
-      <!-- Board + centered Team labels -->
       <div class="boardArea">
         <div class="team1Top">
           <div class="teamInput">
@@ -385,7 +379,6 @@
         <div class="board" id="board"></div>
       </div>
 
-      <!-- Players -->
       <div class="sectionTitle">PLAYERS</div>
       <div class="panel" style="margin-top:10px;">
         <table>
@@ -398,9 +391,7 @@
               <th style="width:140px;">AMOUNT PAID</th>
             </tr>
           </thead>
-          <tbody id="playersBody">
-            <!-- 30 rows injected by JS -->
-          </tbody>
+          <tbody id="playersBody"></tbody>
         </table>
         <div class="note">“Amount Paid” is editable. Everything else updates automatically from the squares.</div>
       </div>
@@ -488,17 +479,37 @@
       <div class="row">
         <button class="btn primary" id="accessBtn">Enter</button>
       </div>
+      <div class="note" id="firebaseStatus" style="margin-top:10px;"></div>
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    /**********************
+     * FIREBASE IMPORTS (CDN)
+     **********************/
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set, update, get, child } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-database.js";
+    import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
     /**********************
      * CONFIG
      **********************/
     const PRICE_PER_SQUARE = 10;
-
-    // Pool access code (fixed per your instructions)
     const POOL_ACCESS_CODE = "REDZONE2026";
+
+    // 🔧 Replace with YOUR Firebase config (Project settings → Web app)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAgO8eCKDswsIZ8dLDyaEmgIv8PberVO2w",
+    authDomain: "superbowl-squares-2026.firebaseapp.com",
+    databaseURL: "https://superbowl-squares-2026-default-rtdb.firebaseio.com",
+    projectId: "superbowl-squares-2026",
+    storageBucket: "superbowl-squares-2026.firebasestorage.app",
+    messagingSenderId: "901124318776",
+    appId: "1:901124318776:web:cefe12e220a2b4c83528cd"
+  };
+
+    // Change this per year (or per pool)
+    const POOL_ID = "superbowl-2026-redzone";
 
     /**********************
      * STATE
@@ -506,34 +517,31 @@
     const defaultState = () => ({
       team1: "TEAM 1",
       team2: "TEAM 2",
-      // Keep these in code for later winner calculation.
-      // You can manually set these arrays later in code.
       colNums: shuffle([...Array(10)].map((_,i)=>i)),
       rowNums: shuffle([...Array(10)].map((_,i)=>i)),
       squares: Array.from({length:10}, () =>
-        Array.from({length:10}, () => ({
-          name: "",
-          claimedAt: null
-        }))
+        Array.from({length:10}, () => ({ name: "", claimedAt: null }))
       ),
-      // Track "Amount Paid" per player (editable)
-      amountPaid: {}, // { "john": "20" } stored as text
-      // Payout editable fields
+      amountPaid: {},
       payout: {
         q1: { name: "", payout: "" },
         q2: { name: "", payout: "" },
         q3: { name: "", payout: "" },
         q4: { name: "", payout: "" }
       },
-      // Score tracker digits (editable)
       scores: {
         t1: { q1:"", q2:"", q3:"", q4:"" },
         t2: { q1:"", q2:"", q3:"", q4:"" }
       }
     });
 
-    let state = loadLocal() ?? defaultState();
+    let state = defaultState();
     let selected = {r:null, c:null};
+
+    // Firebase handles
+    let app, db, auth;
+    let userReady = false;
+    let applyingRemote = false;
 
     /**********************
      * DOM
@@ -542,7 +550,6 @@
     const blankCountEl = document.getElementById("blankCount");
     const selectedCountEl = document.getElementById("selectedCount");
     const totalPotEl = document.getElementById("totalPot");
-    const modeLabelEl = document.getElementById("modeLabel");
 
     const team1El = document.getElementById("team1");
     const team2El = document.getElementById("team2");
@@ -563,6 +570,7 @@
     const accessInput = document.getElementById("accessInput");
     const accessStatus = document.getElementById("accessStatus");
     const accessBtn = document.getElementById("accessBtn");
+    const firebaseStatus = document.getElementById("firebaseStatus");
 
     /**********************
      * ACCESS CODE (once on page load)
@@ -581,28 +589,106 @@
       accessBack.style.display = "none";
       accessInput.value = "";
       accessStatus.textContent = "";
+      firebaseStatus.textContent = "";
     }
-    function validateAccess(){
+
+    async function validateAccessAndConnect(){
       const entered = (accessInput.value || "").trim();
-      if (entered === POOL_ACCESS_CODE) {
-        setAccess();
-        hideAccess();
-        // page now usable
-      } else {
+      if (entered !== POOL_ACCESS_CODE) {
         accessStatus.innerHTML = '<span class="bad">Incorrect code.</span>';
+        return;
+      }
+      setAccess();
+      accessStatus.innerHTML = '<span class="ok">Code accepted.</span>';
+
+      // Initialize + sign in (anonymous)
+      try{
+        firebaseStatus.textContent = "Connecting…";
+        initFirebase();
+        await ensureSignedIn();
+        hideAccess();
+      }catch(e){
+        console.error(e);
+        firebaseStatus.innerHTML = '<span class="bad">Firebase connection failed. Check config + rules.</span>';
       }
     }
-    accessBtn.addEventListener("click", validateAccess);
-    accessInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter") validateAccess(); });
+
+    accessBtn.addEventListener("click", validateAccessAndConnect);
+    accessInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter") validateAccessAndConnect(); });
+
+    /**********************
+     * FIREBASE INIT
+     **********************/
+    function initFirebase(){
+      if (app) return;
+      app = initializeApp(firebaseConfig);
+      db = getDatabase(app);
+      auth = getAuth(app);
+    }
+
+    async function ensureSignedIn(){
+      return new Promise((resolve, reject) => {
+        const unsub = onAuthStateChanged(auth, async (user) => {
+          try{
+            if (!user) {
+              await signInAnonymously(auth);
+              return;
+            }
+            userReady = true;
+            firebaseStatus.textContent = "Connected.";
+            startRealtimeSync();
+            unsub();
+            resolve();
+          }catch(err){
+            unsub();
+            reject(err);
+          }
+        });
+      });
+    }
+
+    function poolStateRef(){
+      return ref(db, `pools/${POOL_ID}/state`);
+    }
+
+    async function bootstrapIfEmpty(){
+      const snap = await get(poolStateRef());
+      if (!snap.exists()){
+        await set(poolStateRef(), defaultState());
+      }
+    }
+
+    function startRealtimeSync(){
+      // Ensure something exists
+      bootstrapIfEmpty().catch(console.error);
+
+      // Listen to server updates
+      onValue(poolStateRef(), (snap) => {
+        const remote = snap.val();
+        if (!remote) return;
+        applyingRemote = true;
+        state = remote;
+        render();
+        applyingRemote = false;
+      });
+    }
+
+    function persistToFirebase(partialOrFull){
+      if (!userReady || applyingRemote) return;
+      // For simplicity (and to avoid merge issues), write the whole state.
+      // Realtime DB is fast enough for this use-case.
+      set(poolStateRef(), partialOrFull).catch(console.error);
+    }
 
     /**********************
      * HEADER BUTTONS
      **********************/
     document.getElementById("randomizeBtn").addEventListener("click", () => {
+      // still admin-gated by #admin in URL
       if (!isAdmin()) return alert("Admin only. Add #admin to the URL to use admin actions.");
       state.colNums = shuffle([...Array(10)].map((_,i)=>i));
       state.rowNums = shuffle([...Array(10)].map((_,i)=>i));
-      persist();
+      persistToFirebase(state);
       render();
     });
 
@@ -620,11 +706,11 @@
      **********************/
     team1El.addEventListener("input", () => {
       state.team1 = team1El.value.trim() || "TEAM 1";
-      persist(); renderLabels();
+      persistToFirebase(state); renderLabels();
     });
     team2El.addEventListener("input", () => {
       state.team2 = team2El.value.trim() || "TEAM 2";
-      persist(); renderLabels();
+      persistToFirebase(state); renderLabels();
     });
 
     /**********************
@@ -639,11 +725,11 @@
 
       const raw = (nameInput.value || "").trim();
 
-      // If empty => clear square (release it)
       if (!raw) {
+        // clear square
         state.squares[r][c].name = "";
         state.squares[r][c].claimedAt = null;
-        persist();
+        persistToFirebase(state);
         render();
         closeModal();
         return;
@@ -651,17 +737,16 @@
 
       state.squares[r][c].name = raw;
       state.squares[r][c].claimedAt = new Date().toISOString();
-      persist();
+
+      persistToFirebase(state);
       render();
       closeModal();
     });
 
     function openModal(r,c){
       selected = {r,c};
-      const current = state.squares[r][c].name || "";
-      nameInput.value = current;
+      nameInput.value = state.squares[r][c].name || "";
       modalStatus.textContent = "";
-      // Keep meta subtle; you can remove if you want
       modalMeta.textContent = "";
       modalBack.style.display = "flex";
       setTimeout(()=>nameInput.focus(), 50);
@@ -685,7 +770,6 @@
       renderScoreTrackerFromState();
       renderWinners();
       renderPayoutFromState();
-      modeLabelEl.textContent = "Local";
     }
 
     function renderLabels(){
@@ -698,31 +782,24 @@
     function renderBoard(){
       boardEl.innerHTML = "";
 
-      // Corner cell (blank)
       boardEl.appendChild(div("hcell corner", ""));
 
-      // Top header cells (blank per your request)
       for (let c=0; c<10; c++){
-        boardEl.appendChild(div("hcell", ""));
+        boardEl.appendChild(div("hcell", "")); // header blank
       }
 
       for (let r=0; r<10; r++){
-        // Left header cells (blank per your request)
-        boardEl.appendChild(div("lcell", ""));
+        boardEl.appendChild(div("lcell", "")); // header blank
 
         for (let c=0; c<10; c++){
           const sq = state.squares[r][c];
           const cell = document.createElement("div");
-          cell.className = "cell" + (sq.name ? " taken" : "");
-          cell.innerHTML = sq.name
-            ? `${escapeHtml(sq.name)}`
-            : `Tap to claim`;
+          cell.className = "cell" + ((sq.name || "").trim() ? " taken" : "");
+          cell.innerHTML = (sq.name || "").trim() ? escapeHtml(sq.name) : "Tap to claim";
 
           cell.addEventListener("click", () => {
-            if (!hasAccess()) {
-              showAccess();
-              return;
-            }
+            // Access is only requested once on page load; block if not unlocked.
+            if (!hasAccess() || !userReady) return;
             openModal(r,c);
           });
 
@@ -733,8 +810,7 @@
 
     function renderCounts(){
       const taken = countTaken();
-      const blank = 100 - taken;
-      blankCountEl.textContent = String(blank);
+      blankCountEl.textContent = String(100 - taken);
       selectedCountEl.textContent = String(taken);
       totalPotEl.textContent = `$${taken * PRICE_PER_SQUARE}`;
     }
@@ -752,15 +828,11 @@
     /**********************
      * PLAYERS TABLE
      **********************/
-    function normalizeName(name){
-      return (name || "").trim();
-    }
-    function keyName(name){
-      return normalizeName(name).toLowerCase();
-    }
+    function normalizeName(name){ return (name || "").trim(); }
+    function keyName(name){ return normalizeName(name).toLowerCase(); }
 
     function computePlayers(){
-      const map = new Map(); // key -> {displayName, count}
+      const map = new Map();
       for (let r=0; r<10; r++){
         for (let c=0; c<10; c++){
           const nm = normalizeName(state.squares[r][c].name);
@@ -770,7 +842,6 @@
           map.get(k).count += 1;
         }
       }
-      // Convert to array sorted by displayName
       const arr = Array.from(map.entries()).map(([k,v])=>({ key:k, name:v.displayName, count:v.count }));
       arr.sort((a,b)=>a.name.localeCompare(b.name));
       return arr;
@@ -805,12 +876,13 @@
         tdPaid.setAttribute("contenteditable", "true");
         tdPaid.setAttribute("spellcheck", "false");
         tdPaid.dataset.pkey = p ? p.key : "";
-        tdPaid.textContent = p ? (state.amountPaid[p.key] ?? "") : "";
+        tdPaid.textContent = p ? (state.amountPaid?.[p.key] ?? "") : "";
         tdPaid.addEventListener("blur", () => {
           const key = tdPaid.dataset.pkey;
           if (!key) return;
+          state.amountPaid = state.amountPaid || {};
           state.amountPaid[key] = (tdPaid.textContent || "").trim();
-          persist();
+          persistToFirebase(state);
         });
         tr.appendChild(tdPaid);
 
@@ -825,7 +897,7 @@
     }
 
     /**********************
-     * SCORE TRACKER (editable)
+     * SCORE TRACKER
      **********************/
     const scoreCells = [
       ["t1","q1","t1q1"],["t1","q2","t1q2"],["t1","q3","t1q3"],["t1","q4","t1q4"],
@@ -835,15 +907,16 @@
     function bindScoreTracker(){
       for (const [team, q, id] of scoreCells){
         const el = document.getElementById(id);
-        // Load existing
-        el.textContent = state.scores[team][q] || "";
+        el.textContent = state?.scores?.[team]?.[q] || "";
         el.addEventListener("input", () => {
-          // Keep only last digit 0-9 (or blank)
           const txt = (el.textContent || "").trim();
           const digit = txt === "" ? "" : txt.replace(/[^0-9]/g, "").slice(-1);
           if (digit !== txt) el.textContent = digit;
+
+          state.scores = state.scores || { t1:{q1:"",q2:"",q3:"",q4:""}, t2:{q1:"",q2:"",q3:"",q4:""} };
           state.scores[team][q] = digit;
-          persist();
+
+          persistToFirebase(state);
           renderWinners();
         });
       }
@@ -852,7 +925,8 @@
     function renderScoreTrackerFromState(){
       for (const [team, q, id] of scoreCells){
         const el = document.getElementById(id);
-        el.textContent = state.scores[team][q] || "";
+        if (!el) continue;
+        el.textContent = state?.scores?.[team]?.[q] || "";
       }
     }
 
@@ -860,11 +934,10 @@
      * WINNER CALCULATION
      **********************/
     function renderWinners(){
-      // For each quarter: find intersection based on last digit
       const qs = ["q1","q2","q3","q4"];
       for (const q of qs){
-        const t1d = state.scores.t1[q];
-        const t2d = state.scores.t2[q];
+        const t1d = state?.scores?.t1?.[q] || "";
+        const t2d = state?.scores?.t2?.[q] || "";
         const winnerEl = document.getElementById("w" + q);
 
         if (!isDigit(t1d) || !isDigit(t2d)) {
@@ -872,8 +945,8 @@
           continue;
         }
 
-        const colIndex = indexOfDigit(state.colNums, Number(t1d));
-        const rowIndex = indexOfDigit(state.rowNums, Number(t2d));
+        const colIndex = indexOfDigit(state.colNums || [], Number(t1d));
+        const rowIndex = indexOfDigit(state.rowNums || [], Number(t2d));
 
         if (colIndex === -1 || rowIndex === -1){
           winnerEl.textContent = "—";
@@ -899,20 +972,23 @@
      * PAYOUT (editable)
      **********************/
     function bindPayout(){
-      // Load existing
       for (const q of ["q1","q2","q3","q4"]){
         const nameCell = document.querySelector(`[data-pname="${q}"]`);
         const payCell  = document.querySelector(`[data-ppay="${q}"]`);
-        nameCell.textContent = state.payout[q].name || "";
-        payCell.textContent  = state.payout[q].payout || "";
+        if (!nameCell || !payCell) continue;
+
+        nameCell.textContent = state?.payout?.[q]?.name || "";
+        payCell.textContent  = state?.payout?.[q]?.payout || "";
 
         nameCell.addEventListener("blur", () => {
+          state.payout = state.payout || { q1:{name:"",payout:""}, q2:{name:"",payout:""}, q3:{name:"",payout:""}, q4:{name:"",payout:""} };
           state.payout[q].name = (nameCell.textContent || "").trim();
-          persist();
+          persistToFirebase(state);
         });
         payCell.addEventListener("blur", () => {
+          state.payout = state.payout || { q1:{name:"",payout:""}, q2:{name:"",payout:""}, q3:{name:"",payout:""}, q4:{name:"",payout:""} };
           state.payout[q].payout = (payCell.textContent || "").trim();
-          persist();
+          persistToFirebase(state);
         });
       }
     }
@@ -921,29 +997,13 @@
       for (const q of ["q1","q2","q3","q4"]){
         const nameCell = document.querySelector(`[data-pname="${q}"]`);
         const payCell  = document.querySelector(`[data-ppay="${q}"]`);
-        if (nameCell) nameCell.textContent = state.payout[q].name || "";
-        if (payCell)  payCell.textContent  = state.payout[q].payout || "";
+        if (nameCell) nameCell.textContent = state?.payout?.[q]?.name || "";
+        if (payCell)  payCell.textContent  = state?.payout?.[q]?.payout || "";
       }
     }
 
     /**********************
-     * STORAGE (Local)
-     **********************/
-    function loadLocal(){
-      try{
-        const raw = localStorage.getItem("sb_squares_state_v1");
-        return raw ? JSON.parse(raw) : null;
-      }catch(e){ return null; }
-    }
-    function saveLocal(){
-      localStorage.setItem("sb_squares_state_v1", JSON.stringify(state));
-    }
-    function persist(){
-      saveLocal();
-    }
-
-    /**********************
-     * ADMIN GATE
+     * ADMIN
      **********************/
     function isAdmin(){
       return (location.hash || "").toLowerCase().includes("admin");
@@ -966,7 +1026,7 @@
       return arr;
     }
     function escapeHtml(s){
-      return s.replace(/[&<>"']/g, (m) => ({
+      return (s || "").replace(/[&<>"']/g, (m) => ({
         "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
       }[m]));
     }
@@ -974,14 +1034,26 @@
     /**********************
      * INIT
      **********************/
-    // If no access yet, show access modal immediately
-    if (!hasAccess()) showAccess();
-
     // Bind editable tables once
     bindScoreTracker();
     bindPayout();
 
-    // First render
+    // If already unlocked on this device, connect immediately; otherwise show access modal.
+    if (!hasAccess()) {
+      showAccess();
+    } else {
+      // connect immediately
+      try{
+        initFirebase();
+        await ensureSignedIn();
+      }catch(e){
+        console.error(e);
+        showAccess();
+        firebaseStatus.innerHTML = '<span class="bad">Firebase connection failed. Check config + rules.</span>';
+      }
+    }
+
+    // Initial render (will be overwritten by Firebase listener once connected)
     render();
   </script>
 </body>
